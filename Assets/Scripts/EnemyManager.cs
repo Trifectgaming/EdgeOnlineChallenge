@@ -11,7 +11,7 @@ public class EnemyManager : MonoBehaviour
     public float positionUpdateDelaySeconds = .5f;
     public float Resolution;
     private float _orthoSize;
-    private List<ProjectileInfo> queues;
+    private List<ProjectileInfo> _queues;
     private Transform _transform;
     private float _maxY;
     private float _minY;
@@ -22,16 +22,15 @@ public class EnemyManager : MonoBehaviour
         _orthoSize = Camera.mainCamera.orthographicSize;
         _maxY = _orthoSize;
         _minY = -_orthoSize;
-        queues = new List<ProjectileInfo>(Projectiles.Length + Projectiles.Sum(p => p.bias));
+        _queues = new List<ProjectileInfo>(Projectiles.Length + Projectiles.Sum(p => p.bias));
         foreach (var projectileInfo in Projectiles)
         {
             projectileInfo.Queue = new ReycleQueue<ProjectileBase>(ProjectileQuantity, projectileInfo.Projectile, _transform.position);
             for (int i = 0; i < projectileInfo.bias; i++)
             {
-                queues.Add(projectileInfo);
+                _queues.Add(projectileInfo);
             }
         }
-        Debug.Log("Queue size: " + queues.Count);
         StartCoroutine(StartWave());
         StartCoroutine(UpdatePosition());
 	}
@@ -50,11 +49,10 @@ public class EnemyManager : MonoBehaviour
     {
         while (true)
         {
-            var seed = Random.Range(0, queues.Count);
-            if (queues.Count == 0) yield break;
+            var seed = Random.Range(0, _queues.Count);
+            if (_queues.Count == 0) yield break;
 
-            Debug.Log("Getting queue " + seed);
-            var info = queues[seed];
+            var info = _queues[seed];
             var projectileToFire = info.Queue.Next();
             projectileToFire.transform.position = _transform.position;
             projectileToFire.Launch(info.speed, info.mode);
