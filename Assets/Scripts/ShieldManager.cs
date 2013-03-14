@@ -76,9 +76,22 @@ public class ShieldManager : MonoBehaviour
         }
         return shields[currentIndex];
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        
+    }
 }
 
 public enum ShieldColor
+{
+    Red,
+    Green,
+    Blue,
+}
+
+
+public enum ProjectileColor
 {
     Red,
     Green,

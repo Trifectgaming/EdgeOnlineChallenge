@@ -4,15 +4,18 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody))]
 public class ProjectileBase : MonoBehaviour
 {
+    public ProjectileColor ProjectileColor;
     private Rigidbody _rigidbody;
     private float _speed;
     private ForceMode _mode;
     private bool _enabled;
+    public Vector3 initialPosition;
 
     void Start ()
 	{
 	    enabled = false;
         renderer.enabled = false;
+        initialPosition = transform.position;
 	}
 	
 	void Update () {
@@ -39,5 +42,12 @@ public class ProjectileBase : MonoBehaviour
     {
         if (!enabled) return; 
         rigidbody.AddForce(Vector3.left * _speed, _mode);
+    }
+
+    public void Reset()
+    {
+        renderer.enabled = false;
+        transform.position = initialPosition;
+        enabled = false;
     }
 }
