@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class MouseController : MonoBehaviour
+public class MouseController : GameSceneObject
 {
     public float sensitivityY = 1;
     public float sensitivityX = 1;
@@ -15,20 +15,18 @@ public class MouseController : MonoBehaviour
     private float maxX;
     private float minX;
 
-    void Start ()
+    protected override void Start ()
 	{
 	    _transform = transform;
 	    maxY = Camera.mainCamera.orthographicSize - maxYOffset;
 	    minY = -maxY + minYOffset;
         maxX = (Camera.mainCamera.GetScreenWidth()/Camera.mainCamera.GetScreenHeight() * maxY) - maxXOffset;
         minX = -maxX + minXOffset;
+        base.Start();
 	}
 
     void Update ()
 	{
-        Screen.lockCursor = true;
-        if (Input.GetKeyDown("escape"))
-            Screen.lockCursor = false;
         float moveDownY = 0.0f;
 	    var y = Input.GetAxis("Mouse Y");
 	    moveDownY += y*sensitivityY;

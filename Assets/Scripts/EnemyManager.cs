@@ -3,20 +3,20 @@ using System.Linq;
 using UnityEngine;
 using System.Collections;
 
-public class EnemyManager : MonoBehaviour
+public class EnemyManager : GameSceneObject
 {
     public ProjectileInfo[] Projectiles;
     public int ProjectileQuantity;
     public float launchDelaySeconds = 1f;
     public float positionUpdateDelaySeconds = .5f;
-    public float Resolution;
+    
     private float _orthoSize;
     private List<ProjectileInfo> _queues;
     private Transform _transform;
     private float _maxY;
     private float _minY;
 
-    void Start ()
+    protected override void Start ()
 	{
         _transform = transform;
         _orthoSize = Camera.mainCamera.orthographicSize;
@@ -31,16 +31,22 @@ public class EnemyManager : MonoBehaviour
                 _queues.Add(projectileInfo);
             }
         }
+        
         StartCoroutine(StartWave());
         StartCoroutine(UpdatePosition());
+        
+        base.Start();
 	}
 
     private IEnumerator UpdatePosition()
     {
         while (true)
         {
-            var newPosition = new Vector3(_transform.position.x, Random.Range(_minY, _maxY), 0);
-            _transform.position = newPosition;
+            if (enabled)
+            {
+                var newPosition = new Vector3(_transform.position.x, Random.Range(_minY, _maxY), 0);
+                _transform.position = newPosition;
+            }
             yield return new WaitForSeconds(positionUpdateDelaySeconds);
         }
     }
@@ -49,13 +55,16 @@ public class EnemyManager : MonoBehaviour
     {
         while (true)
         {
-            var seed = Random.Range(0, _queues.Count);
-            if (_queues.Count == 0) yield break;
+            if (enabled)
+            {
+                var seed = Random.Range(0, _queues.Count);
+                if (_queues.Count == 0) yield break;
 
-            var info = _queues[seed];
-            var projectileToFire = info.Queue.Next();
-            projectileToFire.transform.position = _transform.position;
-            projectileToFire.Launch(info.speed, info.mode);
+                var info = _queues[seed];
+                var projectileToFire = info.Queue.Next();
+                projectileToFire.transform.position = _transform.position;
+                projectileToFire.Launch(info.speed, info.mode);
+            }
             yield return new WaitForSeconds(launchDelaySeconds);
         }
     }

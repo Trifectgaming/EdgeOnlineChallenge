@@ -11,15 +11,16 @@ public class ProjectileBase : MonoBehaviour
     private bool _enabled;
     public Vector3 initialPosition;
 
-    void Start ()
+
+    protected void Start ()
 	{
-	    enabled = false;
+	    //enabled = false;
         renderer.enabled = false;
         initialPosition = transform.position;
 	}
 	
 	void Update () {
-	
+	    
 	}
 
     public void Launch(float speed, ForceMode mode)
@@ -40,7 +41,6 @@ public class ProjectileBase : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!enabled) return; 
         rigidbody.AddForce(Vector3.left * _speed, _mode);
     }
 

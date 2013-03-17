@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
 
-public class ShieldManager : MonoBehaviour
+public class ShieldManager : GameSceneObject
 {
     public float rotationRate = 1;
     public Vector3 activeShield;
@@ -16,7 +16,7 @@ public class ShieldManager : MonoBehaviour
     private Shield previousShield;
     public float changeRate;
     // Use this for initialization
-	void Start ()
+    protected override void Start ()
 	{
 	    _transform = transform;
         foreach (Shield t in shields)
@@ -25,6 +25,7 @@ public class ShieldManager : MonoBehaviour
         }
 
         SetCurrent(shields[0]);
+        base.Start();
 	}
 
     private void SetCurrent(Shield shield)
@@ -34,7 +35,7 @@ public class ShieldManager : MonoBehaviour
         //currentShield.Transform.localScale = new Vector3(0.2f, 4, 1);
         float angle;
         Vector3 axis;
-        currentShield.Transform.localRotation.ToAngleAxis(out angle, out axis);
+        currentShield.transform.localRotation.ToAngleAxis(out angle, out axis);
         finalRotation = Quaternion.AngleAxis(angle * 2, Vector3.forward);
     }
 
