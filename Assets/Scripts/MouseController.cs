@@ -1,10 +1,17 @@
+using System;
 using UnityEngine;
 using System.Collections;
 
+[Serializable]
+public class MouseSensitivity
+{
+    public float sensitivityX = 1;
+    public float sensitivityY = 1;
+}
+
 public class MouseController : GameSceneObject
 {
-    public float sensitivityY = 1;
-    public float sensitivityX = 1;
+    public MouseSensitivity Sensitivity;
     public float minXOffset;
     public float maxXOffset;
     public float minYOffset;
@@ -29,7 +36,7 @@ public class MouseController : GameSceneObject
 	{
         float moveDownY = 0.0f;
 	    var y = Input.GetAxis("Mouse Y");
-	    moveDownY += y*sensitivityY;
+	    moveDownY += y*Sensitivity.sensitivityY;
 	    if (y != 0.0f)
 	    {
             if (_transform.position.y > maxY)
@@ -45,7 +52,7 @@ public class MouseController : GameSceneObject
 
         float moveDownX = 0.0f;
         var x = Input.GetAxis("Mouse X");
-        moveDownX += x * sensitivityX;
+        moveDownX += x * Sensitivity.sensitivityX;
 	    if (x != 0.0f)
 	    {
             if (_transform.position.x > maxX)

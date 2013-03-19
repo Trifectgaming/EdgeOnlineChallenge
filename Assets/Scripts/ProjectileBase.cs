@@ -8,14 +8,13 @@ public class ProjectileBase : MonoBehaviour
     private Rigidbody _rigidbody;
     private float _speed;
     private ForceMode _mode;
-    private bool _enabled;
     public Vector3 initialPosition;
-
+    public float EffetTime = 0;
+    public DamageEffect DamageEffect;
 
     protected void Start ()
 	{
-	    //enabled = false;
-        renderer.enabled = false;
+	    renderer.enabled = false;
         initialPosition = transform.position;
 	}
 	
@@ -50,4 +49,11 @@ public class ProjectileBase : MonoBehaviour
         transform.position = initialPosition;
         enabled = false;
     }
+}
+
+public enum DamageEffect
+{
+    Repulse,
+    Slow,
+    Disable
 }

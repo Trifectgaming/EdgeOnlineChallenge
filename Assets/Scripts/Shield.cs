@@ -20,6 +20,7 @@ public class Shield : MonoBehaviour
             Messenger.Default.Send(new ShieldImpactMessage
                 {
                     WasDeflected = deflected,
+                    Projectile = projectile,
                 });
         }
     }
@@ -28,4 +29,6 @@ public class Shield : MonoBehaviour
 public class ShieldImpactMessage
 {
     public bool WasDeflected;
+
+    public ProjectileBase Projectile;
 }
