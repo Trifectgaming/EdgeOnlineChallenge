@@ -9,7 +9,7 @@ public class ProjectileBase : MonoBehaviour
     private float _speed;
     private ForceMode _mode;
     public Vector3 initialPosition;
-    public float EffetTime = 0;
+    public float EffectTime = 0;
     public DamageEffect DamageEffect;
 
     protected void Start ()
@@ -53,6 +53,7 @@ public class ProjectileBase : MonoBehaviour
 
 public enum DamageEffect
 {
+    None,
     Repulse,
     Slow,
     Disable

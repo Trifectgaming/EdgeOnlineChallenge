@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GameSceneObject : MonoBehaviour
 {
-    private void Awake()
+    protected virtual void Awake()
     {
         Messenger.Default.Register<GameResumeMessage>(this, OnGameResume);
         Messenger.Default.Register<GamePausedMessage>(this, OnGamePaused);
