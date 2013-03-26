@@ -19,9 +19,20 @@ public class Mother : MonoBehaviour {
         {
             var projectile = collision.gameObject.GetComponent<ProjectileBase>();
             projectile.Reset();
+            var rail = GameManager.GetRails()[projectile.CurrentRail];
+            rail.DamageTaken += projectile.Damage;
+            if (rail.DamageTaken >= rail.AllowedDamage)
+            {
+                Messenger.Default.Send(new GameOverMessage());
+                rail.DamageTaken = 0;
+            }
             Messenger.Default.Send(new MotherImpactMessage());
         }
     }
+}
+
+public class GameOverMessage
+{
 }
 
 public class MotherImpactMessage

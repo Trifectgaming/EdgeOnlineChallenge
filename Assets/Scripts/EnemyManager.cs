@@ -10,18 +10,14 @@ public class EnemyManager : GameSceneObject
     public float launchDelaySeconds = 1f;
     public float positionUpdateDelaySeconds = .5f;
     
-    private float _orthoSize;
     private List<ProjectileInfo> _queues;
     private Transform _transform;
-    private float _maxY;
-    private float _minY;
+    private int currentRail;
 
     protected override void Start ()
 	{
         _transform = transform;
-        _orthoSize = Camera.mainCamera.orthographicSize;
-        _maxY = _orthoSize;
-        _minY = -_orthoSize;
+        
         _queues = new List<ProjectileInfo>(Projectiles.Length + Projectiles.Sum(p => p.bias));
         foreach (var projectileInfo in Projectiles)
         {
@@ -31,9 +27,9 @@ public class EnemyManager : GameSceneObject
                 _queues.Add(projectileInfo);
             }
         }
-        
-        StartCoroutine(StartWave());
+
         StartCoroutine(UpdatePosition());
+        StartCoroutine(StartWave());
         
         base.Start();
 	}
@@ -44,7 +40,9 @@ public class EnemyManager : GameSceneObject
         {
             if (enabled)
             {
-                var newPosition = new Vector3(_transform.position.x, Random.Range(_minY, _maxY), 0);
+                var laneCount = GameManager.GetLanes();
+                currentRail = Random.Range(0, laneCount);
+                var newPosition = new Vector3(_transform.position.x, GameManager.GetRails()[currentRail].Center ,0);
                 _transform.position = newPosition;
             }
             yield return new WaitForSeconds(positionUpdateDelaySeconds);
@@ -62,6 +60,7 @@ public class EnemyManager : GameSceneObject
 
                 var info = _queues[seed];
                 var projectileToFire = info.Queue.Next();
+                projectileToFire.CurrentRail = currentRail;
                 projectileToFire.transform.position = _transform.position;
                 projectileToFire.Launch(info.speed, info.mode);
             }

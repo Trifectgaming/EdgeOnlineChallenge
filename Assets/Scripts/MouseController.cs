@@ -25,9 +25,9 @@ public class MouseController : GameSceneObject
     protected override void Start ()
 	{
 	    _transform = transform;
-	    maxY = Camera.mainCamera.orthographicSize - maxYOffset;
+        maxY = UIHelper.MaxY - maxYOffset;
 	    minY = -maxY + minYOffset;
-        maxX = (Camera.mainCamera.GetScreenWidth()/Camera.mainCamera.GetScreenHeight() * maxY) - maxXOffset;
+        maxX = UIHelper.MaxX - maxXOffset;
         minX = -maxX + minXOffset;
         base.Start();
 	}

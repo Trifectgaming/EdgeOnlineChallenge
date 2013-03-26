@@ -11,6 +11,8 @@ public class ProjectileBase : MonoBehaviour
     public Vector3 initialPosition;
     public float EffectTime = 0;
     public DamageEffect DamageEffect;
+    public int Damage;
+    public int CurrentRail;
 
     protected void Start ()
 	{

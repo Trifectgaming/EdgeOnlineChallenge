@@ -15,6 +15,9 @@ public class DamageEffectManager : GameSceneObject
     public MouseSensitivity Repulseffect;
     public float repulseDistance;
     public MeshRenderer effectMaterial;
+    public Color effectRed;
+    public Color effectBlue;
+    public Color effectGreen;
 
     public float repulseSpeed;
     private Vector3 impactDronePosition;
@@ -33,7 +36,7 @@ public class DamageEffectManager : GameSceneObject
     {
         base.Start();
         CurrentEffect = DamageEffect.None;
-        _originalColor = effectMaterial.material.color;
+        _originalColor = effectMaterial.material.GetColor("_TintColor");
         //StartCoroutine(DelayForEffect());
     }
 
@@ -51,13 +54,13 @@ public class DamageEffectManager : GameSceneObject
             switch (obj.Projectile.ProjectileColor)
             {
                 case ProjectileColor.Blue:
-                    _effectColor = Color.blue;
+                    _effectColor = effectBlue;
                     break;
                 case ProjectileColor.Green:
-                    _effectColor = Color.green;
+                    _effectColor = effectGreen;
                     break;
                 case ProjectileColor.Red:
-                    _effectColor = Color.red;
+                    _effectColor = effectRed;
                     break;
             }
         }
@@ -92,7 +95,7 @@ public class DamageEffectManager : GameSceneObject
         Debug.Log("Expiring " + CurrentEffect);
         CurrentEffect = DamageEffect.None;
         Drone.controller.Sensitivity = previousSensitivity;
-        effectMaterial.material.color = _originalColor;
+        effectMaterial.material.SetColor("_TintColor", _originalColor);
     }
 
     void ApplyEffect()
@@ -103,7 +106,7 @@ public class DamageEffectManager : GameSceneObject
                 return;
             case DamageEffect.Disable:
                 Drone.controller.Sensitivity = DisableEffect;
-                effectMaterial.material.color = _effectColor;
+                effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Repulse:
                 //Drone.controller.Sensitivity = Repulseffect;
@@ -113,11 +116,11 @@ public class DamageEffectManager : GameSceneObject
                     impactDronePosition,
                     targetDronePosition,
                    journey);
-                effectMaterial.material.color = _effectColor;
+                effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Slow:
                 Drone.controller.Sensitivity = SlowEffect;
-                effectMaterial.material.color = _effectColor;
+                effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
         }
         Debug.Log("Applying " + CurrentEffect);

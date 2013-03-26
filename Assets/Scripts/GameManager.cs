@@ -1,16 +1,35 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
+    public static int GetLanes()
+    {
+        return _lanes;
+    }
+
+    public static Rail[] GetRails()
+    {
+        return _rails;
+    }
+
     public PauseMenu PauseMenu;
-    public GameObject[] GameSceneObjects;
-    public float previousFixedDelta;
+    public int lanes;
+    public int allowedRailDamage;
+    private static int _lanes;
+    private static Rail[] _rails;
 
     private void Awake()
     {
         Messenger.Default.Register<GameResumeMessage>(this, OnGameResume);
+        Messenger.Default.Register<GameOverMessage>(this, OnGameOver);
+    }
+
+    private void OnGameOver(GameOverMessage obj)
+    {
+        Pause();
     }
 
     private void OnGameResume(GameResumeMessage obj)
@@ -21,30 +40,30 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        
-    }
-    
-    private void DisableGameScene()
-    {
-        foreach (var gameSceneObject in GameSceneObjects)
-        {
-            gameSceneObject.SetActive(false);
-        }
+        CreateRails();
     }
 
-    private void EnableGameScene()
+    private void CreateRails()
     {
-        foreach (var gameSceneObject in GameSceneObjects)
+        _lanes = lanes;
+        var laneHeight = (UIHelper.MaxY - UIHelper.MinY)/(float) _lanes;
+        _rails = new Rail[_lanes];
+        for (int r = 0; r < _lanes; r++)
         {
-            gameSceneObject.SetActive(true);
+            _rails[r] = new Rail {Start = UIHelper.MaxY - (laneHeight*r)};
+            _rails[r].End = _rails[r].Start - laneHeight;
+            _rails[r].Center = _rails[r].Start - (laneHeight/2);
+            _rails[r].DamageTaken = 0;
+            _rails[r].AllowedDamage = allowedRailDamage;
         }
     }
 
     private void Update()
     {
+        if (_lanes != lanes)
+            CreateRails();
         if (Input.GetKeyDown("escape"))
         {
-            Screen.lockCursor = false;
             Pause();
         }
         if (Input.GetMouseButtonDown(0) && !IsPaused())
@@ -56,6 +75,7 @@ public class GameManager : MonoBehaviour
     private void Pause()
     {
         Time.timeScale = 0;
+        Screen.lockCursor = false; 
         Messenger.Default.Send(new GamePausedMessage());
         PauseMenu.Show();
     }
@@ -70,6 +90,24 @@ public class GameManager : MonoBehaviour
         print("Game paused.");
         Pause();
     }
+
+    void OnDrawGizmosSelected()
+    {
+        foreach (var rail in _rails)
+        {
+            Gizmos.DrawLine(new Vector3(UIHelper.MinX, rail.Center, -1), new Vector3(UIHelper.MaxX, rail.Center,-1));
+        }
+    }
+}
+
+[Serializable]
+public class Rail
+{
+    public float Start;
+    public float End;
+    public float Center;
+    public int DamageTaken;
+    public int AllowedDamage;
 }
 
 public class GameResumeMessage { }
