@@ -4,6 +4,7 @@ public class Shield : MonoBehaviour
 {
     public ShieldColor color;
     public Transform Transform;
+    public AudioClip ImpactSound;
 
     private void Start()
     {
@@ -22,6 +23,7 @@ public class Shield : MonoBehaviour
                     WasDeflected = deflected,
                     Projectile = projectile,
                 });
+            if (ImpactSound != null) audio.PlayOneShot(ImpactSound);
         }
     }
 }

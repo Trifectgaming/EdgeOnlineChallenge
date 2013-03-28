@@ -13,6 +13,7 @@ public class ProjectileBase : MonoBehaviour
     public DamageEffect DamageEffect;
     public int Damage;
     public int CurrentRail;
+    public AudioClip LaunchSound;
 
     protected void Start ()
 	{
@@ -38,6 +39,8 @@ public class ProjectileBase : MonoBehaviour
         r.isKinematic = true;
         r.isKinematic = false;
         renderer.enabled = true;
+        if (LaunchSound != null) 
+            audio.PlayOneShot(LaunchSound);
     }
 
     void FixedUpdate()

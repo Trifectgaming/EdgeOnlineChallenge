@@ -18,9 +18,12 @@ public class GameManager : MonoBehaviour
     public PauseMenu PauseMenu;
     public int lanes;
     public int allowedRailDamage;
+    public AudioClip BGM;
+    public AudioClip EndGameAudio;
+
     private static int _lanes;
     private static Rail[] _rails;
-
+    
     private void Awake()
     {
         Messenger.Default.Register<GameResumeMessage>(this, OnGameResume);
@@ -29,6 +32,9 @@ public class GameManager : MonoBehaviour
 
     private void OnGameOver(GameOverMessage obj)
     {
+        audio.Stop();
+        audio.clip = EndGameAudio;
+        audio.Play();
         Pause();
     }
 
@@ -36,11 +42,20 @@ public class GameManager : MonoBehaviour
     {
         Screen.lockCursor = true;
         Time.timeScale = 1;
+        SetupBGM();
     }
 
     private void Start()
     {
+        SetupBGM();
         CreateRails();
+    }
+
+    private void SetupBGM()
+    {
+        audio.Stop();
+        audio.clip = BGM;
+        audio.Play();
     }
 
     private void CreateRails()
@@ -78,6 +93,7 @@ public class GameManager : MonoBehaviour
         Screen.lockCursor = false; 
         Messenger.Default.Send(new GamePausedMessage());
         PauseMenu.Show();
+        
     }
 
     public bool IsPaused()
@@ -93,6 +109,10 @@ public class GameManager : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
+        if (_rails == null)
+        {
+            CreateRails();
+        }
         foreach (var rail in _rails)
         {
             Gizmos.DrawLine(new Vector3(UIHelper.MinX, rail.Center, -1), new Vector3(UIHelper.MaxX, rail.Center,-1));
