@@ -9,22 +9,23 @@ public class EnemyManager : GameSceneObject
     public int ProjectileQuantity;
     public float launchDelaySeconds = 1f;
     public float positionUpdateDelaySeconds = .5f;
+    public ForceMode ForceMode;
     
-    private List<ProjectileInfo> _queues;
+    private List<Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>> _queues;
     private Transform _transform;
-    private int currentRail;
+    private int _currentRail;
 
     protected override void Start ()
 	{
         _transform = transform;
-        
-        _queues = new List<ProjectileInfo>(Projectiles.Length + Projectiles.Sum(p => p.bias));
+
+        _queues = new List<Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>>(Projectiles.Length + Projectiles.Sum(p => p.bias));
         foreach (var projectileInfo in Projectiles)
         {
-            projectileInfo.Queue = new ReycleQueue<ProjectileBase>(ProjectileQuantity, projectileInfo.Projectile, _transform.position);
+            var queue = new ReycleQueue<ProjectileBase>(ProjectileQuantity, projectileInfo.Projectile, _transform.position);
             for (int i = 0; i < projectileInfo.bias; i++)
             {
-                _queues.Add(projectileInfo);
+                _queues.Add(new Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>(projectileInfo, queue));
             }
         }
 
@@ -41,8 +42,8 @@ public class EnemyManager : GameSceneObject
             if (enabled)
             {
                 var laneCount = GameManager.GetLanes();
-                currentRail = Random.Range(0, laneCount);
-                var newPosition = new Vector3(_transform.position.x, GameManager.GetRails()[currentRail].Center ,0);
+                _currentRail = Random.Range(0, laneCount);
+                var newPosition = new Vector3(_transform.position.x, GameManager.GetRails()[_currentRail].Center ,0);
                 _transform.position = newPosition;
             }
             yield return new WaitForSeconds(positionUpdateDelaySeconds);
@@ -59,10 +60,10 @@ public class EnemyManager : GameSceneObject
                 if (_queues.Count == 0) yield break;
 
                 var info = _queues[seed];
-                var projectileToFire = info.Queue.Next();
-                projectileToFire.CurrentRail = currentRail;
+                var projectileToFire = info.Item2.Next();
+                projectileToFire.CurrentRail = _currentRail;
                 projectileToFire.transform.position = _transform.position;
-                projectileToFire.Launch(info.speed, info.mode);
+                projectileToFire.Launch(info.Item1.speed, ForceMode);
             }
             yield return new WaitForSeconds(launchDelaySeconds);
         }

@@ -17,7 +17,7 @@ public class ProjectileBase : MonoBehaviour
 
     protected void Start ()
 	{
-	    renderer.enabled = false;
+	    //renderer.enabled = false;
         initialPosition = transform.position;
 	}
 	

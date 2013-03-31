@@ -21,6 +21,8 @@ public class GameManager : MonoBehaviour
     public AudioClip BGM;
     public AudioClip EndGameAudio;
 
+    public Level[] Levels;
+
     private static int _lanes;
     private static Rail[] _rails;
     
@@ -118,6 +120,22 @@ public class GameManager : MonoBehaviour
             Gizmos.DrawLine(new Vector3(UIHelper.MinX, rail.Center, -1), new Vector3(UIHelper.MaxX, rail.Center,-1));
         }
     }
+}
+
+[Serializable]
+public class Level
+{
+    public Wave[] Waves;
+    public AudioClip BGM;
+    public Material Background;
+}
+
+[Serializable]
+public class Wave
+{
+    public ProjectileInfo[] Projectiles;
+    public float LaunchDelaySeconds;
+    public float PositionUpdateDelaySeconds;
 }
 
 [Serializable]
