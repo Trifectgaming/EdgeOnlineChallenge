@@ -18,27 +18,45 @@ public class GameManager : MonoBehaviour
     public int allowedRailDamage;
     public int currentLevel = 0;
     public int currentWave = 0;
-    public AudioClip BGM;
+    private AudioClip BGM;
     public AudioClip EndGameAudio;
+    public MeshRenderer Background;
+    public float WaveDelaySeconds = 1;
+    public GameObject WaveText;
 
     public Level[] Levels;
 
     private static int _lanes;
     private static Rail[] _rails;
-    
+    private tk2dTextMesh _waveText;
+    private Animation _waveAnimation;
+
     private void Awake()
     {
         Messenger.Default.Register<GameResumeMessage>(this, OnGameResume);
         Messenger.Default.Register<GameOverMessage>(this, OnGameOver);
         Messenger.Default.Register<WaveEndMessage>(this, OnWaveEnd);
+        Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
+    }
+
+    private void OnLevelStart(LevelStartMessage obj)
+    {
+        var level = Levels[currentLevel];
+        currentWave = 0;        
+        BGM = level.BGM;
+        SetupBGM();
+        Background.material = level.Background;
+        SendWaveMessage();
     }
 
     private void OnWaveEnd(WaveEndMessage obj)
     {
         var nextWave = currentWave + 1;
-        if (nextWave < Levels[currentLevel].Waves.Length - 1)
+        if (nextWave < Levels[currentLevel].Waves.Length)
         {
             currentWave = nextWave;
+            Debug.Log("Wave " + currentWave + " of level " + currentLevel + " started.");
+            SendWaveMessage();
         }
         else
         {
@@ -46,14 +64,14 @@ public class GameManager : MonoBehaviour
             if (nextLevel < Levels.Length - 1)
             {
                 currentLevel = nextLevel;
-                currentWave = 0;
+                Messenger.Default.Send(new LevelEndMessage());
+                Messenger.Default.Send(new LevelStartMessage());
             }
             else
             {
                 Messenger.Default.Send(new GameWonMessage());
             }
         }
-        SendWaveMessage();
     }
 
     private void OnGameOver(GameOverMessage obj)
@@ -73,6 +91,9 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        _waveText = WaveText.GetComponent<tk2dTextMesh>();
+        _waveAnimation = WaveText.GetComponent<Animation>();
+        OnLevelStart(null);
         SetupBGM();
         CreateRails();
     }
@@ -132,10 +153,18 @@ public class GameManager : MonoBehaviour
 
     private void SendWaveMessage()
     {
+        _waveText.text = "Level " + (currentLevel + 1) + "\nWave " + (currentWave + 1) + "\nBegin...";
+        _waveText.Commit();
+        _waveAnimation.Play();
+        Invoke("FireWaveMessage", 2);
+    }
+
+    private void FireWaveMessage()
+    {
         Messenger.Default.Send(new WaveBeginMessage
-            {
-                WaveInfo = Levels[currentLevel].Waves[currentWave]
-            });
+                                   {
+                                       WaveInfo = Levels[currentLevel].Waves[currentWave]
+                                   });
     }
 
     private void Pause()

@@ -10,7 +10,6 @@ public class EnemyManager : GameSceneObject
     public float launchDelaySeconds = 1f;
     public float positionUpdateDelaySeconds = .5f;
     public ForceMode ForceMode;
-    public float WaveStartDelay = 1;
     
     private Dictionary<ProjectileColor, Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>> _projectileQueue; 
     private Queue<ProjectileColor> _projectileColors;
@@ -21,19 +20,28 @@ public class EnemyManager : GameSceneObject
     protected override void Start ()
 	{
         _transform = transform;
-        _projectileQueue = new Dictionary<ProjectileColor, Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>>();
-        foreach (var projectileInfo in Projectiles)
-        {
-            var queue = new ReycleQueue<ProjectileBase>(ProjectileQuantity, projectileInfo.Projectile, _transform.position);
-            _projectileQueue.Add(projectileInfo.Projectile.ProjectileColor, 
-                new Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>(projectileInfo, queue));
-        }
-        
+        Setup();
+
         StartCoroutine(UpdatePosition());
         StartCoroutine(LaunchProjectile());
         
         base.Start();
 	}
+
+    private void Setup()
+    {
+        if (_projectileQueue == null)
+        {
+            _projectileQueue = new Dictionary<ProjectileColor, Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>>();
+            foreach (var projectileInfo in Projectiles)
+            {
+                var queue = new ReycleQueue<ProjectileBase>(ProjectileQuantity, projectileInfo.Projectile,
+                                                            (_transform ?? transform).position);
+                _projectileQueue.Add(projectileInfo.Projectile.ProjectileColor,
+                                     new Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>(projectileInfo, queue));
+            }
+        }
+    }
 
     private void Update()
     {
@@ -49,7 +57,7 @@ public class EnemyManager : GameSceneObject
     private void OnWaveBegin(WaveBeginMessage obj)
     {
         LoadFireQueue(obj.WaveInfo);
-        Invoke("StartWave", WaveStartDelay);
+        StartWave();
     }
 
     private void LoadFireQueue(Wave waveInfo)
@@ -126,6 +134,8 @@ public class EnemyManager : GameSceneObject
 
     private void ResetAllProjectiles()
     {
+        if (_projectileQueue == null) return;
+
         foreach (var tuple in _projectileQueue)
         {
             foreach (var projectileBase in tuple.Value.Item2)
