@@ -6,7 +6,7 @@ public class ProjectileBase : MonoBehaviour
 {
     public ProjectileColor ProjectileColor;
     private Rigidbody _rigidbody;
-    private float _speed;
+    public float _speed;
     private ForceMode _mode;
     public Vector3 initialPosition;
     public float EffectTime = 0;
@@ -17,7 +17,6 @@ public class ProjectileBase : MonoBehaviour
 
     protected void Start ()
 	{
-	    //renderer.enabled = false;
         initialPosition = transform.position;
 	}
 	

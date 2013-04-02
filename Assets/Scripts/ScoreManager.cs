@@ -1,6 +1,3 @@
-using UnityEngine;
-using System.Collections;
-
 public class ScoreManager : GameSceneObject
 {
     public tk2dTextMesh motherScore;
@@ -9,8 +6,9 @@ public class ScoreManager : GameSceneObject
     public int misses;
     public int motherHits;
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Messenger.Default.Register<MotherImpactMessage>(this, OnMotherImpact);
         Messenger.Default.Register<ShieldImpactMessage>(this, OnShieldImpact);
     }

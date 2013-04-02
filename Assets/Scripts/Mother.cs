@@ -32,11 +32,3 @@ public class Mother : MonoBehaviour {
         }
     }
 }
-
-public class GameOverMessage
-{
-}
-
-public class MotherImpactMessage
-{
-}

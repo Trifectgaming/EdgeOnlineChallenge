@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class Drone : GameSceneObject
 {
     public tk2dAnimatedSprite sprite;

@@ -27,10 +27,3 @@ public class Shield : MonoBehaviour
         }
     }
 }
-
-public class ShieldImpactMessage
-{
-    public bool WasDeflected;
-
-    public ProjectileBase Projectile;
-}

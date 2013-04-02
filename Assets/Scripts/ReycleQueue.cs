@@ -1,7 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ReycleQueue<T> where T : Object
+public class ReycleQueue<T> : IEnumerable<T> where T : Object
 {
     private readonly Queue<T> _internalQueue;
     public ReycleQueue(int count, T prefab, Vector3 position)
@@ -19,5 +20,15 @@ public class ReycleQueue<T> where T : Object
         var result = _internalQueue.Dequeue();
         _internalQueue.Enqueue(result);
         return result;
+    }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        return _internalQueue.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

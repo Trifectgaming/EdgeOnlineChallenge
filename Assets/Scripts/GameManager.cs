@@ -1,7 +1,5 @@
 using System;
-using System.Linq;
 using UnityEngine;
-using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,6 +16,8 @@ public class GameManager : MonoBehaviour
     public PauseMenu PauseMenu;
     public int lanes;
     public int allowedRailDamage;
+    public int currentLevel = 0;
+    public int currentWave = 0;
     public AudioClip BGM;
     public AudioClip EndGameAudio;
 
@@ -30,6 +30,30 @@ public class GameManager : MonoBehaviour
     {
         Messenger.Default.Register<GameResumeMessage>(this, OnGameResume);
         Messenger.Default.Register<GameOverMessage>(this, OnGameOver);
+        Messenger.Default.Register<WaveEndMessage>(this, OnWaveEnd);
+    }
+
+    private void OnWaveEnd(WaveEndMessage obj)
+    {
+        var nextWave = currentWave + 1;
+        if (nextWave < Levels[currentLevel].Waves.Length - 1)
+        {
+            currentWave = nextWave;
+        }
+        else
+        {
+            var nextLevel = currentLevel + 1;
+            if (nextLevel < Levels.Length - 1)
+            {
+                currentLevel = nextLevel;
+                currentWave = 0;
+            }
+            else
+            {
+                Messenger.Default.Send(new GameWonMessage());
+            }
+        }
+        SendWaveMessage();
     }
 
     private void OnGameOver(GameOverMessage obj)
@@ -87,6 +111,31 @@ public class GameManager : MonoBehaviour
         {
             Screen.lockCursor = true;
         }
+        for (int i = 1; i <= 9; i++)
+        {
+            if (Input.GetKeyDown(i.ToString()))
+                SendLevelStart(i - 1);
+        }
+    }
+
+    private void SendLevelStart(int i)
+    {
+        currentLevel = i;
+        currentWave = 0;
+        if (Levels.Length == 0 || 
+            currentLevel > Levels.Length - 1 || 
+            Levels[currentLevel].Waves.Length == 0 || 
+            currentWave > Levels[currentLevel].Waves.Length - 1) return;
+        
+        SendWaveMessage();
+    }
+
+    private void SendWaveMessage()
+    {
+        Messenger.Default.Send(new WaveBeginMessage
+            {
+                WaveInfo = Levels[currentLevel].Waves[currentWave]
+            });
     }
 
     private void Pause()
@@ -134,6 +183,7 @@ public class Level
 public class Wave
 {
     public ProjectileInfo[] Projectiles;
+    public int Count;
     public float LaunchDelaySeconds;
     public float PositionUpdateDelaySeconds;
 }
@@ -147,6 +197,3 @@ public class Rail
     public int DamageTaken;
     public int AllowedDamage;
 }
-
-public class GameResumeMessage { }
-public class GamePausedMessage { }
