@@ -44,7 +44,6 @@ public class DamageEffectManager : GameSceneObject
     {
         if (!obj.WasDeflected)
         {
-            Debug.Log("Missed");
             impactDronePosition = Drone.transform.position;
             targetDronePosition = new Vector3(impactDronePosition.x - repulseDistance, impactDronePosition.y, impactDronePosition.z);
             CurrentEffect = obj.Projectile.DamageEffect;
@@ -92,7 +91,6 @@ public class DamageEffectManager : GameSceneObject
 
     private void RemoveEffect()
     {
-        Debug.Log("Expiring " + CurrentEffect);
         CurrentEffect = DamageEffect.None;
         Drone.controller.Sensitivity = previousSensitivity;
         effectMaterial.material.SetColor("_TintColor", _originalColor);
@@ -123,6 +121,5 @@ public class DamageEffectManager : GameSceneObject
                 effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
         }
-        Debug.Log("Applying " + CurrentEffect);
     }
 }
