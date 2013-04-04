@@ -61,7 +61,7 @@ public class GameManager : MonoBehaviour
         else
         {
             var nextLevel = currentLevel + 1;
-            if (nextLevel < Levels.Length - 1)
+            if (nextLevel < Levels.Length)
             {
                 currentLevel = nextLevel;
                 Messenger.Default.Send(new LevelEndMessage());
@@ -86,7 +86,6 @@ public class GameManager : MonoBehaviour
     {
         Screen.lockCursor = true;
         Time.timeScale = 1;
-        SetupBGM();
     }
 
     private void Start()
