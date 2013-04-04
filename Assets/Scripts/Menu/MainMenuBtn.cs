@@ -5,6 +5,7 @@ using System.Collections;
 public class MainMenuBtn : MonoBehaviour
 {
     public string levelToLoad;
+    public bool shouldLockCursor;
 
     // Update is called once per frame
 	void Update () {
@@ -14,5 +15,7 @@ public class MainMenuBtn : MonoBehaviour
     void OnMouseUp()
     {
         Application.LoadLevel(levelToLoad);
+        if (shouldLockCursor)
+            Screen.lockCursor = true;
     }
 }

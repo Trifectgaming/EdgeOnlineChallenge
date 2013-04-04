@@ -95,6 +95,7 @@ public class GameManager : MonoBehaviour
         OnLevelStart(null);
         SetupBGM();
         CreateRails();
+        Time.timeScale = 1;
     }
 
     private void SetupBGM()
