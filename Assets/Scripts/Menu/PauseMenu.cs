@@ -5,9 +5,13 @@ public class PauseMenu : MonoBehaviour
     public UIButtonHandler ContinueButton;
     public UIButtonHandler MainMenuButton;
     
+    private void Awake()
+    {
+        ContinueButton.Click += ContinueButtonOnClick;        
+    }
+
     private void Start()
     {
-        ContinueButton.Click += ContinueButtonOnClick;
     }
 
     private void ContinueButtonOnClick(object sender, ClickEventArgs clickEventArgs)

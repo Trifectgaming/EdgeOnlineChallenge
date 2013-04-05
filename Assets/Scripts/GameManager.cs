@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
     private static Rail[] _rails;
     private tk2dTextMesh _waveText;
     private Animation _waveAnimation;
+    private bool _isPaused;
 
     private void Awake()
     {
@@ -86,6 +87,7 @@ public class GameManager : MonoBehaviour
     {
         Screen.lockCursor = true;
         Time.timeScale = 1;
+        _isPaused = false;
     }
 
     private void Start()
@@ -96,6 +98,7 @@ public class GameManager : MonoBehaviour
         SetupBGM();
         CreateRails();
         Time.timeScale = 1;
+        Debug.Log("GameManager Started");
     }
 
     private void SetupBGM()
@@ -173,12 +176,12 @@ public class GameManager : MonoBehaviour
         Screen.lockCursor = false; 
         Messenger.Default.Send(new GamePausedMessage());
         PauseMenu.Show();
-        
+        _isPaused = true;
     }
 
     public bool IsPaused()
     {
-        return Time.timeScale == 0;
+        return Time.timeScale == 0 || _isPaused;
     }
 
     private void OnApplicationPause(bool paused)
