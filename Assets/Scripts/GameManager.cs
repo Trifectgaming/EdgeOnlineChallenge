@@ -190,7 +190,7 @@ public class GameManager : MonoBehaviour
         Pause();
     }
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
         if (_rails == null)
         {
