@@ -63,6 +63,8 @@ public class EnemyManager : GameSceneObject
     private void LoadFireQueue(Wave waveInfo)
     {
         ResetAllProjectiles();
+        positionUpdateDelaySeconds = waveInfo.PositionUpdateDelaySeconds;
+        launchDelaySeconds = waveInfo.LaunchDelaySeconds;
         var colorChance = new List<ProjectileColor>();
         foreach (var projectile in waveInfo.Projectiles)
         {

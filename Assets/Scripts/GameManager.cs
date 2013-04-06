@@ -16,8 +16,8 @@ public class GameManager : MonoBehaviour
     public PauseMenu PauseMenu;
     public int lanes;
     public int allowedRailDamage;
-    public int currentLevel = 0;
-    public int currentWave = 0;
+    private int _currentLevel = 0;
+    private int _currentWaveCount = 0;
     private AudioClip BGM;
     public AudioClip EndGameAudio;
     public MeshRenderer Background;
@@ -32,6 +32,7 @@ public class GameManager : MonoBehaviour
     private tk2dTextMesh _waveText;
     private Animation _waveAnimation;
     private bool _isPaused;
+    public Wave CurrentWave;
 
     protected virtual void Awake()
     {
@@ -43,11 +44,19 @@ public class GameManager : MonoBehaviour
 
     private void OnLevelStart(LevelStartMessage obj)
     {
-        var level = Levels[currentLevel];
-        currentWave = 0;        
+        var level = Levels[_currentLevel];
+        _currentWaveCount = 0;        
         BGM = level.BGM;
         SetupBGM();
         Background.material = level.Background;
+        if (!isEndless)
+        {
+            CurrentWave = Levels[_currentLevel].Waves[_currentWaveCount];
+        }
+        else
+        {
+            CurrentWave = Levels[_currentLevel].Waves[2];
+        }
         SendWaveMessage();
     }
 
@@ -55,19 +64,20 @@ public class GameManager : MonoBehaviour
     {
         if (!isEndless)
         {
-            var nextWave = currentWave + 1;
-            if (nextWave < Levels[currentLevel].Waves.Length)
+            var nextWave = _currentWaveCount + 1;
+            if (nextWave < Levels[_currentLevel].Waves.Length)
             {
-                currentWave = nextWave;
-                Debug.Log("Wave " + currentWave + " of level " + currentLevel + " started.");
+                _currentWaveCount = nextWave;
+                CurrentWave = Levels[_currentLevel].Waves[_currentWaveCount];
+                Debug.Log("Wave " + _currentWaveCount + " of level " + _currentLevel + " started.");
                 SendWaveMessage();
             }
             else
             {
-                var nextLevel = currentLevel + 1;
+                var nextLevel = _currentLevel + 1;
                 if (nextLevel < Levels.Length)
                 {
-                    currentLevel = nextLevel;
+                    _currentLevel = nextLevel;
                     Messenger.Default.Send(new LevelEndMessage());
                     Messenger.Default.Send(new LevelStartMessage());
                 }
@@ -76,6 +86,10 @@ public class GameManager : MonoBehaviour
                     Messenger.Default.Send(new GameWonMessage());
                 }
             }
+        }
+        else
+        {
+            IncrementEndlessWave();
         }
     }
 
@@ -147,17 +161,53 @@ public class GameManager : MonoBehaviour
                     SendLevelStart(i - 1);
             }
         }
+        else
+        {
+            if (Input.GetKeyDown(KeyCode.KeypadPlus))
+                IncrementEndlessWave();
+            if (Input.GetKeyDown(KeyCode.KeypadMinus))
+                DecrementEndlessWave();
+        }
+    }
+
+    private void DecrementEndlessWave()
+    {
+        _currentWaveCount--;
+        var original = CurrentWave;
+        CurrentWave = new Wave
+        {
+            Count = original.Count - 2,
+            LaunchDelaySeconds = original.LaunchDelaySeconds + .05f,
+            PositionUpdateDelaySeconds = original.PositionUpdateDelaySeconds + .1f,
+            Projectiles = original.Projectiles,
+        };
+        SendWaveMessage();
+    }
+
+    private void IncrementEndlessWave()
+    {
+        _currentWaveCount++;
+        var original = CurrentWave;
+        CurrentWave = new Wave
+                           {
+                               Count = original.Count + 2,
+                               LaunchDelaySeconds = original.LaunchDelaySeconds  - .05f,
+                               PositionUpdateDelaySeconds = original.PositionUpdateDelaySeconds - .01f,
+                               Projectiles = original.Projectiles,
+                           };
+        SendWaveMessage();
     }
 
     private void SendLevelStart(int i)
     {
-        currentLevel = i;
-        currentWave = 0;
+        _currentLevel = i;
+        _currentWaveCount = 0;
         if (Levels.Length == 0 || 
-            currentLevel > Levels.Length - 1 || 
-            Levels[currentLevel].Waves.Length == 0 || 
-            currentWave > Levels[currentLevel].Waves.Length - 1) return;
+            _currentLevel > Levels.Length - 1 || 
+            Levels[_currentLevel].Waves.Length == 0 || 
+            _currentWaveCount > Levels[_currentLevel].Waves.Length - 1) return;
         
+        CurrentWave = Levels[_currentLevel].Waves[_currentWaveCount];
         SendWaveMessage();
     }
 
@@ -165,11 +215,11 @@ public class GameManager : MonoBehaviour
     {
         if (!isEndless)
         {
-            _waveText.text = "Level " + (currentLevel + 1) + "\nWave " + (currentWave + 1) + "\nBegin...";
+            _waveText.text = "Level " + (_currentLevel + 1) + "\nWave " + (_currentWaveCount + 1) + "\nBegin...";
         }
         else
         {
-            _waveText.text = "Wave " + (currentWave + 1) + "\nBegin...";
+            _waveText.text = "Wave " + (_currentWaveCount + 1) + "\nBegin...";
         }
         _waveText.Commit();
         _waveAnimation.Play();
@@ -180,7 +230,7 @@ public class GameManager : MonoBehaviour
     {
         Messenger.Default.Send(new WaveBeginMessage
                                    {
-                                       WaveInfo = Levels[currentLevel].Waves[currentWave]
+                                       WaveInfo = CurrentWave,
                                    });
     }
 
