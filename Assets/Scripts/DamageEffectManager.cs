@@ -108,7 +108,7 @@ public class DamageEffectManager : GameSceneObject
                 break;
             case DamageEffect.Repulse:
                 //Drone.controller.Sensitivity = Repulseffect;
-                var distanceCovered = (Time.time - _effectTime)*repulseSpeed;
+                var distanceCovered = (Time.deltaTime - _effectTime)*repulseSpeed;
                 var journey = distanceCovered/repulseDistance;
                 Drone.transform.position = Vector3.Lerp(
                     impactDronePosition,

@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
     public MeshRenderer Background;
     public float WaveDelaySeconds = 1;
     public GameObject WaveText;
+    public bool isEndless;
 
     public Level[] Levels;
 
@@ -32,7 +33,7 @@ public class GameManager : MonoBehaviour
     private Animation _waveAnimation;
     private bool _isPaused;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         Messenger.Default.Register<GameResumeMessage>(this, OnGameResume);
         Messenger.Default.Register<GameOverMessage>(this, OnGameOver);
@@ -52,25 +53,28 @@ public class GameManager : MonoBehaviour
 
     private void OnWaveEnd(WaveEndMessage obj)
     {
-        var nextWave = currentWave + 1;
-        if (nextWave < Levels[currentLevel].Waves.Length)
+        if (!isEndless)
         {
-            currentWave = nextWave;
-            Debug.Log("Wave " + currentWave + " of level " + currentLevel + " started.");
-            SendWaveMessage();
-        }
-        else
-        {
-            var nextLevel = currentLevel + 1;
-            if (nextLevel < Levels.Length)
+            var nextWave = currentWave + 1;
+            if (nextWave < Levels[currentLevel].Waves.Length)
             {
-                currentLevel = nextLevel;
-                Messenger.Default.Send(new LevelEndMessage());
-                Messenger.Default.Send(new LevelStartMessage());
+                currentWave = nextWave;
+                Debug.Log("Wave " + currentWave + " of level " + currentLevel + " started.");
+                SendWaveMessage();
             }
             else
             {
-                Messenger.Default.Send(new GameWonMessage());
+                var nextLevel = currentLevel + 1;
+                if (nextLevel < Levels.Length)
+                {
+                    currentLevel = nextLevel;
+                    Messenger.Default.Send(new LevelEndMessage());
+                    Messenger.Default.Send(new LevelStartMessage());
+                }
+                else
+                {
+                    Messenger.Default.Send(new GameWonMessage());
+                }
             }
         }
     }
@@ -135,10 +139,13 @@ public class GameManager : MonoBehaviour
         {
             Screen.lockCursor = true;
         }
-        for (int i = 1; i <= 9; i++)
+        if (!isEndless)
         {
-            if (Input.GetKeyDown(i.ToString()))
-                SendLevelStart(i - 1);
+            for (int i = 1; i <= 9; i++)
+            {
+                if (Input.GetKeyDown(i.ToString()))
+                    SendLevelStart(i - 1);
+            }
         }
     }
 
@@ -156,7 +163,14 @@ public class GameManager : MonoBehaviour
 
     private void SendWaveMessage()
     {
-        _waveText.text = "Level " + (currentLevel + 1) + "\nWave " + (currentWave + 1) + "\nBegin...";
+        if (!isEndless)
+        {
+            _waveText.text = "Level " + (currentLevel + 1) + "\nWave " + (currentWave + 1) + "\nBegin...";
+        }
+        else
+        {
+            _waveText.text = "Wave " + (currentWave + 1) + "\nBegin...";
+        }
         _waveText.Commit();
         _waveAnimation.Play();
         Invoke("FireWaveMessage", 2);
