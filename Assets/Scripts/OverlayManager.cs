@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 public class OverlayManager : MonoBehaviour
 {
@@ -15,7 +14,7 @@ public class OverlayManager : MonoBehaviour
     void Start ()
     {
         _transform = transform;
-        sprites = this.gameObject.GetComponentsInChildren<tk2dSprite>();
+        sprites = gameObject.GetComponentsInChildren<tk2dSprite>();
         _overlayWidth = sprites[0].GetBounds().size.x;
         _overlayTransforms = new Transform[sprites.Length];
         _end = new Vector3(UIHelper.MinX - _overlayWidth, 0, _transform.position.z);
@@ -51,7 +50,6 @@ public class OverlayManager : MonoBehaviour
         }
         foreach (Transform trans in _overlayTransforms)
         {
-            Debug.Log("Overlay moving from " + trans.position + " to " + _end);
             trans.position = Vector3.MoveTowards(trans.position, _end, Time.deltaTime*speed);
         }
     }

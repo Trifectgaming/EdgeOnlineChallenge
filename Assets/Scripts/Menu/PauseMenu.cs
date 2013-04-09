@@ -16,7 +16,6 @@ public class PauseMenu : MonoBehaviour
 
     private void ContinueButtonOnClick(object sender, ClickEventArgs clickEventArgs)
     {
-        print("Continue Clicked");
         Continue();
     }
 

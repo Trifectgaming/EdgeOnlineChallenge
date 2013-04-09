@@ -1,8 +1,11 @@
 public class ScoreManager : GameSceneObject
 {
-    public tk2dTextMesh motherScore;
-    public tk2dTextMesh hitRating;
-    public int deflections;
+    public tk2dTextMesh scoreText;
+    public int BlockedAdj;
+    public int MissAdj;
+    public int MotherHitAdj;
+    public int totalScore;
+    public int blocked;
     public int misses;
     public int motherHits;
 
@@ -11,26 +14,35 @@ public class ScoreManager : GameSceneObject
         base.Awake();
         Messenger.Default.Register<MotherImpactMessage>(this, OnMotherImpact);
         Messenger.Default.Register<ShieldImpactMessage>(this, OnShieldImpact);
-    }
-
-    private void OnShieldImpact(ShieldImpactMessage obj)
-    {
-        if (obj.WasDeflected) deflections++;
-        else misses++;
-        hitRating.text = "Match/Miss: " + deflections + "/" + misses;
-        hitRating.Commit();
+        Messenger.Default.Register<LevelStartMessage>(this, OnLevelStartMessage);
     }
 
     private void OnMotherImpact(MotherImpactMessage obj)
     {
         motherHits++;
-        motherScore.text = "Mother Hits: " + motherHits;
-        motherScore.Commit();
     }
 
+    private void OnShieldImpact(ShieldImpactMessage obj)
+    {
+        if (obj.WasDeflected)
+        {
+            blocked++;
+        }
+        else
+        {
+            misses++;
+        }
+    }
+
+    private void OnLevelStartMessage(LevelStartMessage obj)
+    {
+        scoreText.text = "Score: " + totalScore;
+        scoreText.Commit();
+    }
+    
     protected override void Start ()
 	{
-        deflections = 0;
+        blocked = 0;
         misses = 0;
 	    motherHits = 0;
         base.Start();
@@ -39,4 +51,38 @@ public class ScoreManager : GameSceneObject
 	void Update () {
 	
 	}
+
+    public ScoreInfo Calculate()
+    {
+        var blockedPts = blocked*BlockedAdj;
+        var missPts = misses*MissAdj;
+        var motherHitPts = motherHits*MotherHitAdj;
+        var total = blockedPts + missPts + motherHitPts;
+        totalScore += total;
+        var result = new ScoreInfo
+                   {
+                       HitsBlocked = blocked,
+                       HitsBlockedPts = blockedPts,
+                       HitsMissed = misses,
+                       HitsMissedPts = missPts,
+                       MotherHits = motherHits,
+                       MotherHitsPts = motherHitPts,
+                       Total = total
+                   };
+        blocked = 0;
+        misses = 0;
+        motherHits = 0;
+        return result;
+    }
+}
+
+public struct ScoreInfo
+{
+    public int HitsBlocked;
+    public int HitsBlockedPts;
+    public int HitsMissed;
+    public int HitsMissedPts;
+    public int MotherHits;
+    public int MotherHitsPts;
+    public int Total;
 }

@@ -14,12 +14,17 @@ public class GameManager : MonoBehaviour
     }
 
     public PauseMenu PauseMenu;
+    public GameOverMenu GameOverMenu;
+    public GameWonMenu GameWonMenu;
+    public ScoreMenu ScoreMenu;
+    public ScoreManager ScoreManager;
     public int lanes;
     public int allowedRailDamage;
     private int _currentLevel = 0;
     private int _currentWaveCount = 0;
     private AudioClip BGM;
     public AudioClip EndGameAudio;
+    public AudioClip WonGameAudio;
     public MeshRenderer Background;
     public float WaveDelaySeconds = 1;
     public GameObject WaveText;
@@ -32,18 +37,39 @@ public class GameManager : MonoBehaviour
     private tk2dTextMesh _waveText;
     private Animation _waveAnimation;
     private bool _isPaused;
+    private bool _isScoring;
     public Wave CurrentWave;
+    private bool _isGameOver;
 
     protected virtual void Awake()
     {
         Messenger.Default.Register<GameResumeMessage>(this, OnGameResume);
         Messenger.Default.Register<GameOverMessage>(this, OnGameOver);
+        Messenger.Default.Register<GameWonMessage>(this, OnGameWon);
         Messenger.Default.Register<WaveEndMessage>(this, OnWaveEnd);
+        Messenger.Default.Register<LevelEndMessage>(this, OnLevelEnd);
         Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
+    }
+
+    private void OnLevelEnd(LevelEndMessage obj)
+    {
+        _isScoring = true;
+        var levelScore = ScoreManager.Calculate();
+        ScoreMenu.Show(levelScore);
+    }
+
+    private void OnGameWon(GameWonMessage obj)
+    {
+        _isGameOver = true;
+        Screen.lockCursor = false;
+        BGM = WonGameAudio;
+        SetupBGM();
+        GameWonMenu.Show();
     }
 
     private void OnLevelStart(LevelStartMessage obj)
     {
+        _isScoring = false;        
         var level = Levels[_currentLevel];
         _currentWaveCount = 0;        
         BGM = level.BGM;
@@ -62,6 +88,7 @@ public class GameManager : MonoBehaviour
 
     private void OnWaveEnd(WaveEndMessage obj)
     {
+        if (_isGameOver) return;
         if (!isEndless)
         {
             var nextWave = _currentWaveCount + 1;
@@ -78,11 +105,13 @@ public class GameManager : MonoBehaviour
                 if (nextLevel < Levels.Length)
                 {
                     _currentLevel = nextLevel;
+                    _isPaused = true;
                     Messenger.Default.Send(new LevelEndMessage());
-                    Messenger.Default.Send(new LevelStartMessage());
                 }
                 else
                 {
+                    BGM = WonGameAudio;
+                    SetupBGM();
                     Messenger.Default.Send(new GameWonMessage());
                 }
             }
@@ -95,10 +124,16 @@ public class GameManager : MonoBehaviour
 
     private void OnGameOver(GameOverMessage obj)
     {
-        audio.Stop();
-        audio.clip = EndGameAudio;
-        audio.Play();
-        Pause();
+        GameOver();
+    }
+
+    private void GameOver()
+    {
+        _isGameOver = true; 
+        Screen.lockCursor = false;
+        BGM = EndGameAudio;
+        SetupBGM();
+        GameOverMenu.Show();
     }
 
     private void OnGameResume(GameResumeMessage obj)
@@ -112,7 +147,7 @@ public class GameManager : MonoBehaviour
     {
         _waveText = WaveText.GetComponent<tk2dTextMesh>();
         _waveAnimation = WaveText.GetComponent<Animation>();
-        OnLevelStart(null);
+        Messenger.Default.Send(new LevelStartMessage());
         SetupBGM();
         CreateRails();
         Time.timeScale = 1;
@@ -145,14 +180,7 @@ public class GameManager : MonoBehaviour
     {
         if (_lanes != lanes)
             CreateRails();
-        if (Input.GetKeyDown("escape"))
-        {
-            Pause();
-        }
-        if (Input.GetMouseButtonDown(0) && !IsPaused())
-        {
-            Screen.lockCursor = true;
-        }
+        
         if (!isEndless)
         {
             for (int i = 1; i <= 9; i++)
@@ -167,6 +195,16 @@ public class GameManager : MonoBehaviour
                 IncrementEndlessWave();
             if (Input.GetKeyDown(KeyCode.KeypadMinus))
                 DecrementEndlessWave();
+        }
+
+        if (_isGameOver || _isScoring) return;
+        if (Input.GetMouseButtonDown(0) && !IsPaused())
+        {
+            Screen.lockCursor = true;
+        }
+        if (Input.GetKeyDown("escape"))
+        {
+            Pause();
         }
     }
 
@@ -207,7 +245,7 @@ public class GameManager : MonoBehaviour
             Levels[_currentLevel].Waves.Length == 0 || 
             _currentWaveCount > Levels[_currentLevel].Waves.Length - 1) return;
         
-        CurrentWave = Levels[_currentLevel].Waves[_currentWaveCount];
+        Messenger.Default.Send(new LevelStartMessage());
         SendWaveMessage();
     }
 
