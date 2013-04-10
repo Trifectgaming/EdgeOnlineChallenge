@@ -47,6 +47,7 @@ public class ScoreMenu : MonoBehaviour
 
     public void Show(ScoreInfo levelScore)
     {
+        ContinueButton.IsEnabled = true;
         Screen.lockCursor = false;
         HitsBlockedText.text = string.Empty;
         HitsMissedText.text = string.Empty;
