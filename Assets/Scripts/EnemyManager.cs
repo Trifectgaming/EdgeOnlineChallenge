@@ -22,8 +22,7 @@ public class EnemyManager : GameSceneObject
         _transform = transform;
         Setup();
 
-        StartCoroutine(UpdatePosition());
-        StartCoroutine(LaunchProjectile());
+        StartCoroutine(Begin());
         
         base.Start();
 	}
@@ -41,6 +40,13 @@ public class EnemyManager : GameSceneObject
                                      new Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>(projectileInfo, queue));
             }
         }
+    }
+
+    private IEnumerator Begin()
+    {
+        StartCoroutine(UpdatePosition());
+        yield return new WaitForSeconds(positionUpdateDelaySeconds);
+        StartCoroutine(LaunchProjectile());
     }
 
     private void Update()
@@ -118,9 +124,9 @@ public class EnemyManager : GameSceneObject
                     var color = _projectileColors.Dequeue();
                     var info = _projectileQueue[color];
                     var projectileToFire = info.Item2.Next();
-                    projectileToFire.CurrentRail = _currentRail;
                     projectileToFire.transform.position = _transform.position;
                     projectileToFire.Launch(info.Item1.speed, ForceMode);
+                    projectileToFire.CurrentRail = _currentRail;
                 }
                 else
                 {

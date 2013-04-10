@@ -1,11 +1,22 @@
+using System.Linq;
 using UnityEngine;
 using System.Collections;
 
-public class Mother : MonoBehaviour {
+public class Mother : MonoBehaviour
+{
+    public tk2dSprite[] DamageDecals;
+    public tk2dAnimatedSprite[] DamageAnims;
+
 
 	// Use this for initialization
-	void Start () {
-	
+	void Start ()
+	{
+	    DamageDecals = gameObject.GetComponentsInChildren<tk2dSprite>()
+            .OrderBy(t=>t.name)
+            .ToArray();
+        DamageAnims = gameObject.GetComponentsInChildren<tk2dAnimatedSprite>()
+            .OrderBy(t => t.name)
+            .ToArray();
 	}
 	
 	// Update is called once per frame
@@ -21,7 +32,18 @@ public class Mother : MonoBehaviour {
             projectile.Reset();
             
             var rail = GameManager.GetRails()[projectile.CurrentRail];
+            Debug.Log("Rail " + projectile.CurrentRail + " was hit.");
             rail.DamageTaken += projectile.Damage;
+            if (rail.DamageTaken >= 1)
+            {
+                DamageDecals[projectile.CurrentRail].gameObject.renderer.enabled = true;
+                Debug.Log("Decal " + DamageDecals[projectile.CurrentRail].name + " was Enabled.");
+            }
+            if (rail.DamageTaken >= 2)
+            {
+                DamageAnims[projectile.CurrentRail].gameObject.renderer.enabled = true;
+                Debug.Log("Anim " + DamageAnims[projectile.CurrentRail].name + " was Enabled.");
+            }
             if (rail.DamageTaken >= rail.AllowedDamage)
             {
                 Messenger.Default.Send(new GameOverMessage());
