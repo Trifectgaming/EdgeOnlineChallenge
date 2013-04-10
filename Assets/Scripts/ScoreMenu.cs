@@ -1,49 +1,39 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
-public class ScoreMenu : MonoBehaviour
+public abstract class ScoreMenuBase : MonoBehaviour
 {
+    public UIButtonHandler ContinueButton;
     public UILabel HitsBlockedText;
     public UILabel HitsMissedText;
     public UILabel MotherHitsText;
     public UILabel TotalText;
+    protected bool IsScoring;
+    protected float UpdateDelay;
     public float updateDelay = .5f;
-    private float _updateDelay;
-    public UIButtonHandler ContinueButton;
-    private bool _isScoring;
 
-    // Use this for initialization
-	void Start ()
-	{
-	    ContinueButton.Click += OnContinueButton;
-	}
-
-    private void OnContinueButton(object sender, ClickEventArgs e)
+    protected virtual void Start()
     {
-        print("ContinueButton Clicked");
-        Screen.lockCursor = true;
+        ContinueButton.Click += OnContinueButton;
+    }
+
+    protected void OnContinueButton(object sender, ClickEventArgs e)
+    {
         ContinueButton.IsEnabled = false;
-        if (_isScoring)
+        if (IsScoring)
         {
-            _updateDelay = 0;
-            Invoke("LevelStart", 2);
+            UpdateDelay = 0;
+            Invoke("Continue", 2);
         }
         else
         {
-            LevelStart();
+            Continue();
         }
     }
 
-    private void LevelStart()
-    {
-        Messenger.Default.Send(new LevelStartMessage());
-        gameObject.SetActive(false);
-    }
+    protected abstract void Continue();
 
-    // Update is called once per frame
-	void Update () {
-	
-	}
+    protected virtual void Update() { }
 
     public void Show(ScoreInfo levelScore)
     {
@@ -53,22 +43,31 @@ public class ScoreMenu : MonoBehaviour
         HitsMissedText.text = string.Empty;
         MotherHitsText.text = string.Empty;
         TotalText.text = string.Empty;
-        _updateDelay = updateDelay;
+        UpdateDelay = updateDelay;
         gameObject.SetActive(true);
         StartCoroutine(UpdateScore(levelScore));
     }
 
     public IEnumerator UpdateScore(ScoreInfo levelScore)
     {
-        
-        _isScoring = true;
-        HitsBlockedText.text = levelScore.HitsBlockedPts + " (" + levelScore.HitsBlocked +")";
-        yield return new WaitForSeconds(_updateDelay);
+        IsScoring = true;
+        HitsBlockedText.text = levelScore.HitsBlockedPts + " (" + levelScore.HitsBlocked + ")";
+        yield return new WaitForSeconds(UpdateDelay);
         HitsMissedText.text = levelScore.HitsMissedPts + " (" + levelScore.HitsMissed + ")";
-        yield return new WaitForSeconds(_updateDelay);
+        yield return new WaitForSeconds(UpdateDelay);
         MotherHitsText.text = levelScore.MotherHitsPts + " (" + levelScore.MotherHits + ")";
-        yield return new WaitForSeconds(_updateDelay);
+        yield return new WaitForSeconds(UpdateDelay);
         TotalText.text = levelScore.Total.ToString();
-        _isScoring = false;
+        IsScoring = false;
+    }
+}
+
+public class ScoreMenu : ScoreMenuBase
+{
+    protected override void Continue()
+    {
+        Screen.lockCursor = true;
+        Messenger.Default.Send(new LevelStartMessage());
+        gameObject.SetActive(false);
     }
 }

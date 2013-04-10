@@ -1,17 +1,12 @@
 using UnityEngine;
 using System.Collections;
 
-public class GameWonMenu : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+public class GameWonMenu : ScoreMenuBase
+{
+	protected override void Continue()
+    {
+        
+    }
 
     public void Show()
     {

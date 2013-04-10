@@ -1,17 +1,13 @@
 using UnityEngine;
 using System.Collections;
 
-public class GameOverMenu : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
+public class GameOverMenu : ScoreMenuBase
+{
 	// Update is called once per frame
-	void Update () {
-	
-	}
+    protected override void Continue()
+    {
+        
+    }
 
     public void Show()
     {
