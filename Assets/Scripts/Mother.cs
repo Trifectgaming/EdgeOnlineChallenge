@@ -6,7 +6,9 @@ public class Mother : MonoBehaviour
 {
     public tk2dSprite[] DamageDecals;
     public tk2dAnimatedSprite[] DamageAnims;
-
+    public string spriteNameTemplate;
+    public int spriteStart;
+    public int spriteEnd;
 
 	// Use this for initialization
 	void Start ()
@@ -33,10 +35,13 @@ public class Mother : MonoBehaviour
             
             var rail = GameManager.GetRails()[projectile.CurrentRail];
             Debug.Log("Rail " + projectile.CurrentRail + " was hit.");
+            var previousDamage = rail.DamageTaken;
             rail.DamageTaken += projectile.Damage;
-            if (rail.DamageTaken >= 1)
+            if (previousDamage == 0)
             {
-                DamageDecals[projectile.CurrentRail].gameObject.renderer.enabled = true;
+                var decal = DamageDecals[projectile.CurrentRail];
+                decal.spriteId = decal.GetSpriteIdByName(string.Format(spriteNameTemplate, Random.Range(spriteStart, spriteEnd + 1)));
+                decal.gameObject.renderer.enabled = true;
                 Debug.Log("Decal " + DamageDecals[projectile.CurrentRail].name + " was Enabled.");
             }
             if (rail.DamageTaken >= 2)
