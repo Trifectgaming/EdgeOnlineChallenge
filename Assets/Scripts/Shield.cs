@@ -17,11 +17,13 @@ public class Shield : MonoBehaviour
         {
             var projectile = collision.gameObject.GetComponent<ProjectileBase>();
             bool deflected = (int) projectile.ProjectileColor == (int) color;
+            var impactPosition = projectile.transform.position;
             projectile.Reset();
             Messenger.Default.Send(new ShieldImpactMessage
                 {
                     WasDeflected = deflected,
                     Projectile = projectile,
+                    ImpactPosition =  impactPosition
                 });
             if (ImpactSound != null) audio.PlayOneShot(ImpactSound);
         }

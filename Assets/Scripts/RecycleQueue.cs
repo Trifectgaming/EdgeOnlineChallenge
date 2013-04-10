@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ReycleQueue<T> : IEnumerable<T> where T : Object
+public class RecycleQueue<T> : IEnumerable<T> where T : Object
 {
     private readonly Queue<T> _internalQueue;
-    public ReycleQueue(int count, T prefab, Vector3 position)
+    public RecycleQueue(int count, T prefab, Vector3 position)
     {
         _internalQueue = new Queue<T>(count);
         for (int i = 0; i < count; i++)

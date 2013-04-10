@@ -11,7 +11,7 @@ public class EnemyManager : GameSceneObject
     public float positionUpdateDelaySeconds = .5f;
     public ForceMode ForceMode;
     
-    private Dictionary<ProjectileColor, Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>> _projectileQueue; 
+    private Dictionary<ProjectileColor, Tuple<ProjectileInfo, RecycleQueue<ProjectileBase>>> _projectileQueue; 
     private Queue<ProjectileColor> _projectileColors;
     private Transform _transform;
     private int _currentRail;
@@ -31,13 +31,13 @@ public class EnemyManager : GameSceneObject
     {
         if (_projectileQueue == null)
         {
-            _projectileQueue = new Dictionary<ProjectileColor, Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>>();
+            _projectileQueue = new Dictionary<ProjectileColor, Tuple<ProjectileInfo, RecycleQueue<ProjectileBase>>>();
             foreach (var projectileInfo in Projectiles)
             {
-                var queue = new ReycleQueue<ProjectileBase>(ProjectileQuantity, projectileInfo.Projectile,
+                var queue = new RecycleQueue<ProjectileBase>(ProjectileQuantity, projectileInfo.Projectile,
                                                             (_transform ?? transform).position);
                 _projectileQueue.Add(projectileInfo.Projectile.ProjectileColor,
-                                     new Tuple<ProjectileInfo, ReycleQueue<ProjectileBase>>(projectileInfo, queue));
+                                     new Tuple<ProjectileInfo, RecycleQueue<ProjectileBase>>(projectileInfo, queue));
             }
         }
     }

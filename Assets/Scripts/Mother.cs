@@ -31,6 +31,7 @@ public class Mother : MonoBehaviour
         if (collision.gameObject.tag == "Projectiles")
         {
             var projectile = collision.gameObject.GetComponent<ProjectileBase>();
+            var impactPosition = projectile.transform.position;
             projectile.Reset();
             
             var rail = GameManager.GetRails()[projectile.CurrentRail];
@@ -54,7 +55,10 @@ public class Mother : MonoBehaviour
                 Messenger.Default.Send(new GameOverMessage());
                 rail.DamageTaken = 0;
             }
-            Messenger.Default.Send(new MotherImpactMessage());
+            Messenger.Default.Send(new MotherImpactMessage
+                                       {
+                                           ImpactPosition = impactPosition
+                                       });
             audio.Play();
         }
     }
