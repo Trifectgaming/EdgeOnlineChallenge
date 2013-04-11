@@ -22,6 +22,7 @@ public class ShieldManager : GameSceneObject
         foreach (Shield t in shields)
         {
             t.transform.localScale = new Vector3(1, 1, 1);
+            t.Shrink();
         }
 
         SetCurrent(shields[0]);
@@ -32,6 +33,8 @@ public class ShieldManager : GameSceneObject
     {
         previousShield = currentShield;
         currentShield = shield;
+        if (previousShield != null) previousShield.Shrink();
+        currentShield.Grow();
         //currentShield.Transform.localScale = new Vector3(0.2f, 4, 1);
         float angle;
         Vector3 axis;
@@ -52,9 +55,9 @@ public class ShieldManager : GameSceneObject
         }
 	    if (previousShield != null)
 	    {
-	        previousShield.Transform.localScale = Vector3.Lerp(previousShield.Transform.localScale, deactiveShield, Time.deltaTime * changeRate);
+	        //previousShield.Transform.localScale = Vector3.Lerp(previousShield.Transform.localScale, deactiveShield, Time.deltaTime * changeRate);
 	    }
-        currentShield.Transform.localScale = Vector3.Lerp(currentShield.Transform.localScale, activeShield, Time.deltaTime * changeRate);
+        //currentShield.Transform.localScale = Vector3.Lerp(currentShield.Transform.localScale, activeShield, Time.deltaTime * changeRate);
 	    _transform.rotation = Quaternion.Slerp(_transform.rotation, finalRotation, Time.deltaTime * rotationRate);
 	}
 
