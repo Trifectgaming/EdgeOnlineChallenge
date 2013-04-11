@@ -60,11 +60,13 @@ public class GameManager : MonoBehaviour
 
     private void OnGameWon(GameWonMessage obj)
     {
+        if (_isGameOver) return;
         _isGameOver = true;
         Screen.lockCursor = false;
         BGM = WonGameAudio;
         SetupBGM();
-        GameWonMenu.Show();
+        var levelScore = ScoreManager.Calculate();
+        GameWonMenu.Show(levelScore);
     }
 
     private void OnLevelStart(LevelStartMessage obj)
@@ -129,11 +131,13 @@ public class GameManager : MonoBehaviour
 
     private void GameOver()
     {
+        if (_isGameOver) return;
         _isGameOver = true; 
         Screen.lockCursor = false;
         BGM = EndGameAudio;
         SetupBGM();
-        GameOverMenu.Show();
+        var levelScore = ScoreManager.Calculate();
+        GameOverMenu.Show(levelScore);
     }
 
     private void OnGameResume(GameResumeMessage obj)

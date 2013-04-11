@@ -21,7 +21,7 @@ public class ShieldManager : GameSceneObject
 	    _transform = transform;
         foreach (Shield t in shields)
         {
-            t.transform.localScale = new Vector3(0.2f, 1, 1);
+            t.transform.localScale = new Vector3(1, 1, 1);
         }
 
         SetCurrent(shields[0]);

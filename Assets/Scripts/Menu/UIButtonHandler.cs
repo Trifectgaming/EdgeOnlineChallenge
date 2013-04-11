@@ -3,12 +3,11 @@ using UnityEngine;
 
 public class UIButtonHandler : MonoBehaviour
 {
-    private UIButton _button;
     public event EventHandler<ClickEventArgs> Click;
     public bool IsEnabled
     {
-        get { return _button.isEnabled; }
-        set { _button.isEnabled = value; }
+        get { return gameObject.GetComponent<UIButton>().isEnabled; }
+        set { gameObject.GetComponent<UIButton>().isEnabled = value; }
     }
 
     protected virtual void RaiseClick(ClickEventArgs e)
@@ -20,7 +19,6 @@ public class UIButtonHandler : MonoBehaviour
     // Use this for initialization
 	void Start ()
 	{
-	    _button = gameObject.GetComponent<UIButton>();
 	}
 	
 	// Update is called once per frame

@@ -3,13 +3,10 @@ using System.Collections;
 
 public class GameWonMenu : ScoreMenuBase
 {
-	protected override void Continue()
-    {
-        
-    }
+    public string levelToLoad;
 
-    public void Show()
+    protected override void Continue()
     {
-        gameObject.SetActive(true);
+        Application.LoadLevel(levelToLoad);
     }
 }
