@@ -1,3 +1,7 @@
+using System.Collections;
+using UnityEngine;
+using System.Xml.Serialization;
+
 public class ScoreManager : GameSceneObject
 {
     public tk2dTextMesh scoreText;
@@ -8,6 +12,7 @@ public class ScoreManager : GameSceneObject
     public int blocked;
     public int misses;
     public int motherHits;
+    public float scoreUpdateDelay;
 
     protected override void Awake()
     {
@@ -36,21 +41,34 @@ public class ScoreManager : GameSceneObject
 
     private void OnLevelStartMessage(LevelStartMessage obj)
     {
+        SetScore();
+    }
+
+    private void SetScore()
+    {
         scoreText.text = "Score: " + totalScore;
         scoreText.Commit();
     }
-    
+
     protected override void Start ()
 	{
         blocked = 0;
         misses = 0;
 	    motherHits = 0;
         base.Start();
+        if (GameManager.IsEndless)
+            StartCoroutine(EndlessScoreUpdate());
 	}
-	
-	void Update () {
-	
-	}
+
+    private IEnumerator EndlessScoreUpdate()
+    {
+        while (true)
+        {
+            Calculate();
+            SetScore();
+            yield return new WaitForSeconds(scoreUpdateDelay);
+        }
+    }
 
     public ScoreInfo Calculate()
     {
@@ -58,7 +76,14 @@ public class ScoreManager : GameSceneObject
         var missPts = misses*MissAdj;
         var motherHitPts = motherHits*MotherHitAdj;
         var total = blockedPts + missPts + motherHitPts;
-        totalScore += total;
+        if (GameManager.IsEndless)
+        {
+            totalScore = total;
+        }
+        else
+        {
+            totalScore += total;
+        }
         var result = new ScoreInfo
                    {
                        HitsBlocked = blocked,
@@ -69,9 +94,12 @@ public class ScoreManager : GameSceneObject
                        MotherHitsPts = motherHitPts,
                        Total = total
                    };
-        blocked = 0;
-        misses = 0;
-        motherHits = 0;
+        if (!GameManager.IsEndless)
+        {
+            blocked = 0;
+            misses = 0;
+            motherHits = 0;
+        }
         return result;
     }
 }

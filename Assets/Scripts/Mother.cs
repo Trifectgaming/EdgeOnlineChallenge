@@ -35,7 +35,6 @@ public class Mother : MonoBehaviour
             projectile.Reset();
             
             var rail = GameManager.GetRails()[projectile.CurrentRail];
-            Debug.Log("Rail " + projectile.CurrentRail + " was hit.");
             var previousDamage = rail.DamageTaken;
             rail.DamageTaken += projectile.Damage;
             if (previousDamage == 0)
@@ -43,12 +42,10 @@ public class Mother : MonoBehaviour
                 var decal = DamageDecals[projectile.CurrentRail];
                 decal.spriteId = decal.GetSpriteIdByName(string.Format(spriteNameTemplate, Random.Range(spriteStart, spriteEnd + 1)));
                 decal.gameObject.renderer.enabled = true;
-                Debug.Log("Decal " + DamageDecals[projectile.CurrentRail].name + " was Enabled.");
             }
             if (rail.DamageTaken >= 2)
             {
                 DamageAnims[projectile.CurrentRail].gameObject.renderer.enabled = true;
-                Debug.Log("Anim " + DamageAnims[projectile.CurrentRail].name + " was Enabled.");
             }
             if (rail.DamageTaken >= rail.AllowedDamage)
             {

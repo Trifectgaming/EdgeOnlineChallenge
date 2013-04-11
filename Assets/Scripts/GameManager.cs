@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
     public MeshRenderer Background;
     public float WaveDelaySeconds = 1;
     public GameObject WaveText;
-    public bool isEndless;
+    public static bool IsEndless;
 
     public Level[] Levels;
 
@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
         BGM = level.BGM;
         SetupBGM();
         Background.material = level.Background;
-        if (!isEndless)
+        if (!IsEndless)
         {
             CurrentWave = Levels[_currentLevel].Waves[_currentWaveCount];
         }
@@ -91,7 +91,7 @@ public class GameManager : MonoBehaviour
     private void OnWaveEnd(WaveEndMessage obj)
     {
         if (_isGameOver) return;
-        if (!isEndless)
+        if (!IsEndless)
         {
             var nextWave = _currentWaveCount + 1;
             if (nextWave < Levels[_currentLevel].Waves.Length)
@@ -185,7 +185,7 @@ public class GameManager : MonoBehaviour
         if (_lanes != lanes)
             CreateRails();
         
-        if (!isEndless)
+        if (!IsEndless)
         {
             for (int i = 1; i <= 9; i++)
             {
@@ -233,11 +233,27 @@ public class GameManager : MonoBehaviour
         CurrentWave = new Wave
                            {
                                Count = original.Count + 2,
-                               LaunchDelaySeconds = original.LaunchDelaySeconds  - .05f,
-                               PositionUpdateDelaySeconds = original.PositionUpdateDelaySeconds - .01f,
+                               LaunchDelaySeconds = LaunchDelaySeconds(original),
+                               PositionUpdateDelaySeconds = PositionUpdateDelaySeconds(original),
                                Projectiles = original.Projectiles,
                            };
         SendWaveMessage();
+    }
+
+    private static float PositionUpdateDelaySeconds(Wave original)
+    {
+        var delay =  original.PositionUpdateDelaySeconds - .01f;
+        if (delay < .2f)
+            delay = .2f;
+        return delay;
+    }
+
+    private static float LaunchDelaySeconds(Wave original)
+    {
+        var delay = original.LaunchDelaySeconds  - .05f;
+        if (delay < .4f)
+            delay = .4f;
+        return delay;
     }
 
     private void SendLevelStart(int i)
@@ -255,7 +271,7 @@ public class GameManager : MonoBehaviour
 
     private void SendWaveMessage()
     {
-        if (!isEndless)
+        if (!IsEndless)
         {
             _waveText.text = "Level " + (_currentLevel + 1) + "\nWave " + (_currentWaveCount + 1) + "\nBegin...";
         }
