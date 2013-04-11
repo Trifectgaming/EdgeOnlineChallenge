@@ -8,11 +8,15 @@ public class Shield : MonoBehaviour
     public AudioClip ImpactSound;
     private tk2dAnimatedSprite _growAnim;
     private tk2dAnimatedSprite _shrinkAnim;
+    public bool Started;
 
-    private void Start()
+    public void Start()
     {
+        if (Started) return;
+        Started = true;
         Transform = transform;
         var anims = gameObject.GetComponentsInChildren<tk2dAnimatedSprite>();
+        Debug.Log(anims.Length + " anims found");
         _shrinkAnim = anims.First(t => t.name == name + "Shrink");
         _shrinkAnim.renderer.enabled = false;
         _growAnim = anims.First(t => t.name == name + "Grow");
@@ -21,6 +25,7 @@ public class Shield : MonoBehaviour
 
     public void Grow()
     {
+        Start();
         _growAnim.renderer.enabled = true;
         _shrinkAnim.renderer.enabled = false;
         _growAnim.Play();
@@ -28,6 +33,7 @@ public class Shield : MonoBehaviour
 
     public void Shrink()
     {
+        Start();
         _shrinkAnim.renderer.enabled = true;
         _growAnim.renderer.enabled = false;
         _shrinkAnim.Play();

@@ -6,6 +6,7 @@ using System.Collections;
 public class ShieldManager : GameSceneObject
 {
     public float rotationRate = 1;
+    public float shieldCycleDelay = .2f;
     public Vector3 activeShield;
     public Vector3 deactiveShield;
     private Shield currentShield;
@@ -16,16 +17,37 @@ public class ShieldManager : GameSceneObject
     private Shield previousShield;
     public float changeRate;
     // Use this for initialization
+    protected override void Awake()
+    {
+        base.Awake();
+        Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
+    }
+
+    private void OnLevelStart(LevelStartMessage obj)
+    {
+        StartCoroutine(CycleShields());
+    }
+
+    private IEnumerator CycleShields()
+    {
+        for (int i = 0; i < shields.Length; i++)
+        {
+            var shield = GetNextShield();
+            SetCurrent(shield);
+            yield return new WaitForSeconds(shieldCycleDelay);
+        }
+    }
+
     protected override void Start ()
 	{
 	    _transform = transform;
-        foreach (Shield t in shields)
-        {
-            t.transform.localScale = new Vector3(1, 1, 1);
-            t.Shrink();
-        }
+        //foreach (Shield t in shields)
+        //{
+        //    //t.transform.localScale = new Vector3(1, 1, 1);
+        //    t.Shrink();
+        //}
 
-        SetCurrent(shields[0]);
+        //SetCurrent(shields[0]);
         base.Start();
 	}
 
