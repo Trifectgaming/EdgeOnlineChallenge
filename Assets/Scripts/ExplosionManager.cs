@@ -6,7 +6,9 @@ public class ExplosionManager : MonoBehaviour
 {
     public int count;
     public tk2dAnimatedSprite prefab;
+    public ParticleSystem[] explosionPrefabs;
     private RecycleQueue<tk2dAnimatedSprite> _recycleQueue;
+    private RecycleQueue<ParticleSystem>[] _explosionQueues;
 
     void Awake()
     {
@@ -16,8 +18,8 @@ public class ExplosionManager : MonoBehaviour
 
     private void OnMotherImpact(MotherImpactMessage obj)
     {
-        
-            var explosion = _recycleQueue.Next();
+            var explosion = _explosionQueues[UnityEngine.Random.Range(0, _explosionQueues.Length)].Next();
+            //var explosion = _recycleQueue.Next();
             explosion.renderer.enabled = true;
             explosion.transform.position = obj.ImpactPosition;
             explosion.Play();
@@ -27,6 +29,7 @@ public class ExplosionManager : MonoBehaviour
     {
         if (!obj.WasDeflected)
         {
+            //var explosion = _explosionQueues[UnityEngine.Random.Range(0, _explosionQueues.Length)].Next();
             var explosion = _recycleQueue.Next();
             explosion.renderer.enabled = true;
             explosion.transform.position = obj.ImpactPosition;
@@ -36,6 +39,17 @@ public class ExplosionManager : MonoBehaviour
 
     // Use this for initialization
 	void Start () {
+        _explosionQueues = new RecycleQueue<ParticleSystem>[explosionPrefabs.Length];
+	    for (int index = 0; index < explosionPrefabs.Length; index++)
+	    {
+	        var explosionPrefab = explosionPrefabs[index];
+            _explosionQueues[index] = new RecycleQueue<ParticleSystem>(count, explosionPrefab, transform.position);
+	        foreach (var system in _explosionQueues[index])
+	        {
+	            system.Stop(true);
+	        }
+
+	    }
 	    _recycleQueue = new RecycleQueue<tk2dAnimatedSprite>(count, prefab, transform.position);
 	    foreach (var tk2DAnimatedSprite in _recycleQueue)
 	    {
