@@ -6,9 +6,11 @@ public class ExplosionManager : MonoBehaviour
 {
     public int count;
     public tk2dAnimatedSprite prefab;
-    public ParticleSystem[] explosionPrefabs;
+    public ParticleSystem motherExplosionPrefabs;
+    public ParticleSystem shieldBlockPrefabs;
     private RecycleQueue<tk2dAnimatedSprite> _recycleQueue;
-    private RecycleQueue<ParticleSystem>[] _explosionQueues;
+    private RecycleQueue<ParticleSystem> _motherExplosionQueues;
+    private RecycleQueue<ParticleSystem> _shieldBlockQueue;
 
     void Awake()
     {
@@ -18,10 +20,9 @@ public class ExplosionManager : MonoBehaviour
 
     private void OnMotherImpact(MotherImpactMessage obj)
     {
-            var explosion = _explosionQueues[UnityEngine.Random.Range(0, _explosionQueues.Length)].Next();
-            //var explosion = _recycleQueue.Next();
+            var explosion = _motherExplosionQueues.Next();
             explosion.renderer.enabled = true;
-            explosion.transform.position = obj.ImpactPosition;
+            explosion.transform.position = new Vector3(obj.ImpactPosition.x, obj.ImpactPosition.y, transform.position.z);
             explosion.Play();
     }
 
@@ -29,27 +30,46 @@ public class ExplosionManager : MonoBehaviour
     {
         if (!obj.WasDeflected)
         {
-            //var explosion = _explosionQueues[UnityEngine.Random.Range(0, _explosionQueues.Length)].Next();
             var explosion = _recycleQueue.Next();
             explosion.renderer.enabled = true;
+            explosion.transform.position = new Vector3(obj.ImpactPosition.x, obj.ImpactPosition.y, transform.position.z);
+            explosion.Play();
+        }
+        else
+        {
+            var explosion = _shieldBlockQueue.Next();
             explosion.transform.position = obj.ImpactPosition;
+            if (obj.Projectile.ProjectileColor == ProjectileColor.Blue)
+            {
+                explosion.startColor = Color.blue;
+            }
+            else if (obj.Projectile.ProjectileColor == ProjectileColor.Red)
+            {
+                explosion.startColor = Color.red;
+            }
+            else
+            {
+                explosion.startColor = Color.green;
+            }
             explosion.Play();
         }
     }
 
     // Use this for initialization
-	void Start () {
-        _explosionQueues = new RecycleQueue<ParticleSystem>[explosionPrefabs.Length];
-	    for (int index = 0; index < explosionPrefabs.Length; index++)
+	void Start ()
+	{
+        _motherExplosionQueues = new RecycleQueue<ParticleSystem>(count, motherExplosionPrefabs, transform.position);
+	    foreach (var system in _motherExplosionQueues)
 	    {
-	        var explosionPrefab = explosionPrefabs[index];
-            _explosionQueues[index] = new RecycleQueue<ParticleSystem>(count, explosionPrefab, transform.position);
-	        foreach (var system in _explosionQueues[index])
-	        {
-	            system.Stop(true);
-	        }
-
+	        system.Stop(true);
 	    }
+
+        _shieldBlockQueue = new RecycleQueue<ParticleSystem>(count, shieldBlockPrefabs, transform.position);
+        foreach (var system in _shieldBlockQueue)
+        {
+            system.Stop(true);
+        }
+
 	    _recycleQueue = new RecycleQueue<tk2dAnimatedSprite>(count, prefab, transform.position);
 	    foreach (var tk2DAnimatedSprite in _recycleQueue)
 	    {
