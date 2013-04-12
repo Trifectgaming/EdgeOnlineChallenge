@@ -14,6 +14,7 @@ public class ProjectileBase : MonoBehaviour
     public int Damage;
     public int CurrentRail;
     public AudioClip LaunchSound;
+    public ParticleSystem thruster;
 
     protected void Start ()
 	{
@@ -38,8 +39,14 @@ public class ProjectileBase : MonoBehaviour
         r.isKinematic = true;
         r.isKinematic = false;
         renderer.enabled = true;
-        if (LaunchSound != null) 
+        if (LaunchSound)
+        {
             audio.PlayOneShot(LaunchSound);
+        }
+        if (thruster)
+        {
+            thruster.Play(true);
+        }
     }
 
     void FixedUpdate()
@@ -52,6 +59,7 @@ public class ProjectileBase : MonoBehaviour
         renderer.enabled = false;
         transform.position = initialPosition;
         enabled = false;
+        if (thruster) thruster.Stop(true);
     }
 }
 

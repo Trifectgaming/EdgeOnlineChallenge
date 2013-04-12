@@ -1,8 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(AudioSource))]
-public class MainMenuBtn : MonoBehaviour
+public class MainMenuBtn : UIButtonHandler
 {
     public string levelToLoad;
     public bool isEndless;
@@ -13,11 +12,12 @@ public class MainMenuBtn : MonoBehaviour
 	    
 	}
 
-    void OnMouseUp()
+    protected override void RaiseClick(ClickEventArgs e)
     {
         Application.LoadLevel(levelToLoad);
         GameManager.IsEndless = isEndless;
         if (shouldLockCursor)
             Screen.lockCursor = true;
+
     }
 }

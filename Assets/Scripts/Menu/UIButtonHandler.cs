@@ -26,7 +26,7 @@ public class UIButtonHandler : MonoBehaviour
 	
 	}
 
-    void OnClick()
+    protected virtual void OnClick()
     {
         RaiseClick(new ClickEventArgs(this, EventArgs.Empty));
     }
