@@ -4,7 +4,6 @@ using System.Collections;
 public class MainMenuBtn : UIButtonHandler
 {
     public string levelToLoad;
-    public bool isEndless;
     public bool shouldLockCursor;
 
     // Update is called once per frame
@@ -14,10 +13,9 @@ public class MainMenuBtn : UIButtonHandler
 
     protected override void RaiseClick(ClickEventArgs e)
     {
-        Application.LoadLevel(levelToLoad);
-        GameManager.IsEndless = isEndless;
+        base.RaiseClick(e);
         if (shouldLockCursor)
             Screen.lockCursor = true;
-
+        Application.LoadLevel(levelToLoad);
     }
 }

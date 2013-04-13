@@ -40,6 +40,7 @@ public class GameManager : MonoBehaviour
     private bool _isScoring;
     public Wave CurrentWave;
     private bool _isGameOver;
+    public static GameMode GameMode;
 
     protected virtual void Awake()
     {
@@ -60,13 +61,28 @@ public class GameManager : MonoBehaviour
 
     private void OnGameWon(GameWonMessage obj)
     {
-        if (_isGameOver) return;
+        ScoreInfo levelScore;
+        if (EndGame(WonGameAudio, out levelScore)) return;
+        GameWonMenu.Show(levelScore);
+    }
+
+    private bool EndGame(AudioClip audioClip, out ScoreInfo levelScore)
+    {
+        levelScore = new ScoreInfo();
+        if (_isGameOver) return true;
         _isGameOver = true;
         Screen.lockCursor = false;
-        BGM = WonGameAudio;
+        BGM = audioClip;
         SetupBGM();
-        var levelScore = ScoreManager.Calculate();
-        GameWonMenu.Show(levelScore);
+        levelScore = ScoreManager.Calculate();        
+        return false;
+    }
+
+    private void GameOver()
+    {
+        ScoreInfo levelScore;
+        if (EndGame(EndGameAudio, out levelScore)) return;
+        GameOverMenu.Show(levelScore);
     }
 
     private void OnLevelStart(LevelStartMessage obj)
@@ -128,18 +144,7 @@ public class GameManager : MonoBehaviour
     {
         GameOver();
     }
-
-    private void GameOver()
-    {
-        if (_isGameOver) return;
-        _isGameOver = true; 
-        Screen.lockCursor = false;
-        BGM = EndGameAudio;
-        SetupBGM();
-        var levelScore = ScoreManager.Calculate();
-        GameOverMenu.Show(levelScore);
-    }
-
+    
     private void OnGameResume(GameResumeMessage obj)
     {
         Screen.lockCursor = true;
@@ -155,7 +160,8 @@ public class GameManager : MonoBehaviour
         SetupBGM();
         CreateRails();
         Time.timeScale = 1;
-        Debug.Log("GameManager Started");
+        GameMode = IsEndless ? GameMode.Endless : GameMode.Story;
+        Debug.Log("GameManager Started with " + PlayerName);
     }
 
     private void SetupBGM()
@@ -323,6 +329,8 @@ public class GameManager : MonoBehaviour
             Gizmos.DrawLine(new Vector3(UIHelper.MinX, rail.Center, -1), new Vector3(UIHelper.MaxX, rail.Center,-1));
         }
     }
+
+    public static string PlayerName;
 }
 
 [Serializable]

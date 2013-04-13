@@ -8,11 +8,12 @@ public class ScoreManager : GameSceneObject
     public int BlockedAdj;
     public int MissAdj;
     public int MotherHitAdj;
-    public int totalScore;
+    public long totalScore;
     public int blocked;
     public int misses;
     public int motherHits;
     public float scoreUpdateDelay;
+    private bool _gameOver;
 
     protected override void Awake()
     {
@@ -20,6 +21,18 @@ public class ScoreManager : GameSceneObject
         Messenger.Default.Register<MotherImpactMessage>(this, OnMotherImpact);
         Messenger.Default.Register<ShieldImpactMessage>(this, OnShieldImpact);
         Messenger.Default.Register<LevelStartMessage>(this, OnLevelStartMessage);
+        Messenger.Default.Register<GameWonMessage>(this, OnGameWon);
+        Messenger.Default.Register<GameOverMessage>(this, OnGameOver);
+    }
+
+    private void OnGameOver(GameOverMessage obj)
+    {
+        _gameOver = true;
+    }
+
+    private void OnGameWon(GameWonMessage obj)
+    {
+        _gameOver = true;        
     }
 
     private void OnMotherImpact(MotherImpactMessage obj)
@@ -41,6 +54,7 @@ public class ScoreManager : GameSceneObject
 
     private void OnLevelStartMessage(LevelStartMessage obj)
     {
+        _gameOver = false;
         SetScore();
     }
 
@@ -64,9 +78,11 @@ public class ScoreManager : GameSceneObject
     {
         while (true)
         {
+            if (_gameOver) break;
             Calculate();
             SetScore();
             yield return new WaitForSeconds(scoreUpdateDelay);
+            if (_gameOver) break;
         }
     }
 
@@ -84,6 +100,9 @@ public class ScoreManager : GameSceneObject
         {
             totalScore += total;
         }
+        int position;
+        if (LeaderBoardManager.CheckHighScore(totalScore, out position))
+            LeaderBoardManager.SetHighScore(GameManager.PlayerName, totalScore);
         var result = new ScoreInfo
                    {
                        HitsBlocked = blocked,
@@ -92,7 +111,9 @@ public class ScoreManager : GameSceneObject
                        HitsMissedPts = missPts,
                        MotherHits = motherHits,
                        MotherHitsPts = motherHitPts,
-                       Total = total
+                       Total = total,
+                       TotalScore = totalScore,
+                       position = position,
                    };
         if (!GameManager.IsEndless)
         {
@@ -113,4 +134,6 @@ public struct ScoreInfo
     public int MotherHits;
     public int MotherHitsPts;
     public int Total;
+    public int position;
+    public long TotalScore;
 }

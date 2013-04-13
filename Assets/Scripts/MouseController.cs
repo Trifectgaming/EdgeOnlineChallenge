@@ -28,6 +28,12 @@ public class MouseController : GameSceneObject
         Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
         Messenger.Default.Register<LevelEndMessage>(this, OnLevelEnd);
         Messenger.Default.Register<GameOverMessage>(this, OnGameOver);
+        Messenger.Default.Register<GameWonMessage>(this, OnGameWon);
+    }
+
+    private void OnGameWon(GameWonMessage obj)
+    {
+        enabled = false;
     }
 
     private void OnGameOver(GameOverMessage obj)
