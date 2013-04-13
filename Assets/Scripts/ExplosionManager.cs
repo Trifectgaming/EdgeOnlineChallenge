@@ -6,11 +6,13 @@ public class ExplosionManager : MonoBehaviour
 {
     public int count;
     public tk2dAnimatedSprite prefab;
+    public tk2dAnimatedSprite redExplosionPrefab;
     public ParticleSystem motherExplosionPrefabs;
     public ParticleSystem shieldBlockPrefabs;
     private RecycleQueue<tk2dAnimatedSprite> _recycleQueue;
     private RecycleQueue<ParticleSystem> _motherExplosionQueues;
     private RecycleQueue<ParticleSystem> _shieldBlockQueue;
+    private RecycleQueue<tk2dAnimatedSprite> _redExplosionQueue;
 
     void Awake()
     {
@@ -32,26 +34,34 @@ public class ExplosionManager : MonoBehaviour
         {
             var explosion = _recycleQueue.Next();
             explosion.renderer.enabled = true;
-            explosion.transform.position = new Vector3(obj.ImpactPosition.x, obj.ImpactPosition.y, transform.position.z);
+            explosion.transform.position = new Vector3(obj.ImpactPosition.x, obj.ImpactPosition.y,
+                                                       transform.position.z);
             explosion.Play();
         }
         else
         {
-            var explosion = _shieldBlockQueue.Next();
-            explosion.transform.position = obj.ImpactPosition;
             if (obj.Projectile.ProjectileColor == ProjectileColor.Blue)
             {
+                var explosion = _shieldBlockQueue.Next();
+                explosion.transform.position = new Vector3(obj.ImpactPosition.x, obj.ImpactPosition.y, transform.position.z);
                 explosion.startColor = Color.blue;
+                explosion.Play();
             }
             else if (obj.Projectile.ProjectileColor == ProjectileColor.Red)
             {
-                explosion.startColor = Color.red;
+                var explosion = _redExplosionQueue.Next();
+                explosion.renderer.enabled = true;
+                explosion.transform.position = new Vector3(obj.ProjectilePosition.x, obj.ProjectilePosition.y,
+                                                           transform.position.z);
+                explosion.Play();
             }
             else
             {
+                var explosion = _shieldBlockQueue.Next();
+                explosion.transform.position = new Vector3(obj.ImpactPosition.x, obj.ImpactPosition.y, transform.position.z);
                 explosion.startColor = Color.green;
+                explosion.Play();
             }
-            explosion.Play();
         }
     }
 
@@ -68,6 +78,13 @@ public class ExplosionManager : MonoBehaviour
         foreach (var system in _shieldBlockQueue)
         {
             system.Stop(true);
+        }
+
+        _redExplosionQueue = new RecycleQueue<tk2dAnimatedSprite>(count, redExplosionPrefab, transform.position);
+        foreach (var system in _redExplosionQueue)
+        {
+            system.renderer.enabled = false;
+            system.animationCompleteDelegate = OnAnimationCompleted;
         }
 
 	    _recycleQueue = new RecycleQueue<tk2dAnimatedSprite>(count, prefab, transform.position);

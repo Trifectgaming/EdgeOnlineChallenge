@@ -22,6 +22,29 @@ public class MouseController : GameSceneObject
     private float maxX;
     private float minX;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
+        Messenger.Default.Register<LevelEndMessage>(this, OnLevelEnd);
+        Messenger.Default.Register<GameOverMessage>(this, OnGameOver);
+    }
+
+    private void OnGameOver(GameOverMessage obj)
+    {
+        enabled = false;
+    }
+
+    private void OnLevelEnd(LevelEndMessage obj)
+    {
+        enabled = false;
+    }
+
+    private void OnLevelStart(LevelStartMessage obj)
+    {
+        enabled = true;
+    }
+
     protected override void Start ()
 	{
 	    _transform = transform;

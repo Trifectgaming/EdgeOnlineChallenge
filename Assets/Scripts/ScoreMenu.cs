@@ -23,7 +23,7 @@ public abstract class ScoreMenuBase : MonoBehaviour
         if (IsScoring)
         {
             UpdateDelay = 0;
-            Invoke("Continue", 2);
+            Invoke("Continue", 1);
         }
         else
         {

@@ -44,13 +44,15 @@ public class Shield : MonoBehaviour
         if (collision.gameObject.tag == "Projectiles")
         {
             var projectile = collision.gameObject.GetComponent<ProjectileBase>();
+            var projectileLocation = projectile.transform.position;
             bool deflected = (int) projectile.ProjectileColor == (int) color;
             projectile.Reset();
             Messenger.Default.Send(new ShieldImpactMessage
                 {
                     WasDeflected = deflected,
                     Projectile = projectile,
-                    ImpactPosition =  collision.contacts.First().point
+                    ImpactPosition =  collision.contacts.First().point,
+                    ProjectilePosition = projectileLocation
                 });
             if (ImpactSound != null) audio.PlayOneShot(ImpactSound);
         }

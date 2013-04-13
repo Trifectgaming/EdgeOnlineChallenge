@@ -124,7 +124,7 @@ public class EnemyManager : GameSceneObject
                     var color = _projectileColors.Dequeue();
                     var info = _projectileQueue[color];
                     var projectileToFire = info.Item2.Next();
-                    projectileToFire.transform.position = _transform.position;
+                    projectileToFire.transform.position = new Vector3(_transform.position.x, _transform.position.y, projectileToFire.transform.position.z);
                     projectileToFire.Launch(info.Item1.speed, ForceMode);
                     projectileToFire.CurrentRail = _currentRail;
                 }
