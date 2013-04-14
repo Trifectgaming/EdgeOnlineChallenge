@@ -58,6 +58,13 @@ public class EnemyManager : GameSceneObject
     {
         base.Awake();
         Messenger.Default.Register<WaveBeginMessage>(this, OnWaveBegin);
+        Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
+    }
+
+    private void OnLevelStart(LevelStartMessage obj)
+    {
+        _waveStarted = false;
+        ResetAllProjectiles();   
     }
 
     private void OnWaveBegin(WaveBeginMessage obj)

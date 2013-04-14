@@ -72,7 +72,9 @@ public class LeaderBoardManager : MonoBehaviour
     public static bool CheckHighScore(long score, out int position)
     {
         position = -1;
-        foreach (var playerScore in Scores[GameManager.GameMode])
+        List<PlayerScore> scores;
+        if (!Scores.TryGetValue(GameManager.GameMode, out scores)) return false;
+        foreach (var playerScore in scores)
         {
             position++;
             if (score > playerScore.Score)

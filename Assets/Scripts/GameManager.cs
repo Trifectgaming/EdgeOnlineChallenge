@@ -50,12 +50,18 @@ public class GameManager : MonoBehaviour
         Messenger.Default.Register<WaveEndMessage>(this, OnWaveEnd);
         Messenger.Default.Register<LevelEndMessage>(this, OnLevelEnd);
         Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
+        Messenger.Default.Register<LevelRetryMessage>(this, OnLevelRetry);
+    }
+
+    private void OnLevelRetry(LevelRetryMessage obj)
+    {
+        Messenger.Default.Send(new LevelStartMessage());
     }
 
     private void OnLevelEnd(LevelEndMessage obj)
     {
         _isScoring = true;
-        var levelScore = ScoreManager.Calculate();
+        var levelScore = ScoreManager.Calculate(false);
         ScoreMenu.Show(levelScore);
     }
 
@@ -74,7 +80,7 @@ public class GameManager : MonoBehaviour
         Screen.lockCursor = false;
         BGM = audioClip;
         SetupBGM();
-        levelScore = ScoreManager.Calculate();        
+        levelScore = ScoreManager.Calculate(true);        
         return false;
     }
 
@@ -87,7 +93,8 @@ public class GameManager : MonoBehaviour
 
     private void OnLevelStart(LevelStartMessage obj)
     {
-        _isScoring = false;        
+        _isScoring = false;
+        _isGameOver = false;
         var level = Levels[_currentLevel];
         _currentWaveCount = 0;        
         BGM = level.BGM;

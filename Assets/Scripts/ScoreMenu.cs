@@ -1,4 +1,7 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 public abstract class ScoreMenuBase : MonoBehaviour
@@ -12,8 +15,11 @@ public abstract class ScoreMenuBase : MonoBehaviour
     protected float UpdateDelay;
     public float updateDelay = .5f;
 
-    protected virtual void Start()
+    protected List<Action<ScoreInfo>> AdditionalActions;
+
+    protected virtual void Awake()
     {
+        AdditionalActions = new List<Action<ScoreInfo>>();
         ContinueButton.Click += OnContinueButton;
     }
 
@@ -45,7 +51,12 @@ public abstract class ScoreMenuBase : MonoBehaviour
         TotalText.text = string.Empty;
         UpdateDelay = updateDelay;
         gameObject.SetActive(true);
+        Showing();
         StartCoroutine(UpdateScore(levelScore));
+    }
+
+    protected virtual void Showing()
+    {
     }
 
     public IEnumerator UpdateScore(ScoreInfo levelScore)
@@ -57,7 +68,12 @@ public abstract class ScoreMenuBase : MonoBehaviour
         yield return new WaitForSeconds(UpdateDelay);
         MotherHitsText.text = levelScore.MotherHitsPts + " (" + levelScore.MotherHits + ")";
         yield return new WaitForSeconds(UpdateDelay);
-        TotalText.text = levelScore.Total.ToString();
+        TotalText.text = levelScore.LevelTotal.ToString(CultureInfo.InvariantCulture);
+        foreach (var additionalActions in AdditionalActions)
+        {
+            yield return new WaitForSeconds(UpdateDelay);
+            additionalActions(levelScore);
+        }
         IsScoring = false;
     }
 }

@@ -10,8 +10,34 @@ public class Mother : MonoBehaviour
     public int spriteStart;
     public int spriteEnd;
 
-	// Use this for initialization
-	void Start ()
+    void Awake()
+    {
+        Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
+    }
+
+    private void OnLevelStart(LevelStartMessage obj)
+    {
+        ResetRailDamage();
+    }
+
+    private void ResetRailDamage()
+    {
+        if (GameManager.GetRails() != null)
+        {
+            for (int index = 0; index < GameManager.GetRails().Length; index++)
+            {
+                var rail = GameManager.GetRails()[index];
+                rail.DamageTaken = 0;
+
+                DamageDecals[index].gameObject.renderer.enabled = false;
+
+                DamageAnims[index].Stop();
+                DamageAnims[index].gameObject.renderer.enabled = false;
+            }
+        }
+    }
+
+    void Start ()
 	{
 	    DamageDecals = gameObject.GetComponentsInChildren<tk2dSprite>()
             .OrderBy(t=>t.name)
@@ -44,12 +70,12 @@ public class Mother : MonoBehaviour
             }
             if (rail.DamageTaken >= 2)
             {
+                DamageAnims[projectile.CurrentRail].Play();
                 DamageAnims[projectile.CurrentRail].gameObject.renderer.enabled = true;
             }
             if (rail.DamageTaken >= rail.AllowedDamage)
             {
                 Messenger.Default.Send(new GameOverMessage());
-                rail.DamageTaken = 0;
             }
             Messenger.Default.Send(new MotherImpactMessage
                                        {

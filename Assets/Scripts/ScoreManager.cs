@@ -79,14 +79,14 @@ public class ScoreManager : GameSceneObject
         while (true)
         {
             if (_gameOver) break;
-            Calculate();
+            Calculate(false);
             SetScore();
             yield return new WaitForSeconds(scoreUpdateDelay);
             if (_gameOver) break;
         }
     }
 
-    public ScoreInfo Calculate()
+    public ScoreInfo Calculate(bool gameOver)
     {
         var blockedPts = blocked*BlockedAdj;
         var missPts = misses*MissAdj;
@@ -101,7 +101,7 @@ public class ScoreManager : GameSceneObject
             totalScore += total;
         }
         int position;
-        if (LeaderBoardManager.CheckHighScore(totalScore, out position))
+        if (LeaderBoardManager.CheckHighScore(totalScore, out position) && gameOver)
             LeaderBoardManager.SetHighScore(GameManager.PlayerName, totalScore);
         var result = new ScoreInfo
                    {
@@ -111,7 +111,7 @@ public class ScoreManager : GameSceneObject
                        HitsMissedPts = missPts,
                        MotherHits = motherHits,
                        MotherHitsPts = motherHitPts,
-                       Total = total,
+                       LevelTotal = total,
                        TotalScore = totalScore,
                        position = position,
                    };
@@ -133,7 +133,7 @@ public struct ScoreInfo
     public int HitsMissedPts;
     public int MotherHits;
     public int MotherHitsPts;
-    public int Total;
+    public int LevelTotal;
     public int position;
     public long TotalScore;
 }
