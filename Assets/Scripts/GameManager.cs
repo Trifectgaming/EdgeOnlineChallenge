@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     }
 
     public PauseMenu PauseMenu;
+    public TutorialMenu TutorialMenu;
     public GameOverMenu GameOverMenu;
     public GameWonMenu GameWonMenu;
     public ScoreMenu ScoreMenu;
@@ -29,6 +30,7 @@ public class GameManager : MonoBehaviour
     public float WaveDelaySeconds = 1;
     public GameObject WaveText;
     public static bool IsEndless;
+    public bool IgnoreTutorialPref;
 
     public Level[] Levels;
 
@@ -51,6 +53,34 @@ public class GameManager : MonoBehaviour
         Messenger.Default.Register<LevelEndMessage>(this, OnLevelEnd);
         Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
         Messenger.Default.Register<LevelRetryMessage>(this, OnLevelRetry);
+        Messenger.Default.Register<ProjectileFirstFiredMessage>(this, OnFirstFired);
+    }
+
+    private void OnFirstFired(ProjectileFirstFiredMessage obj)
+    {
+        Debug.Log("First fired");
+        if (obj.Color == ProjectileColor.Red && (IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialOne")))
+        {
+            Debug.Log("Red fired");
+            Time.timeScale = 0;
+            Screen.lockCursor = false;
+            PlayerPrefs.SetInt("TutorialOne", 1);
+            TutorialMenu.Show(Tutorial.Red);
+        }
+        else if (obj.Color == ProjectileColor.Green && (IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialTwo")))
+        {
+            Time.timeScale = 0;
+            Screen.lockCursor = false;
+            PlayerPrefs.SetInt("TutorialTwo", 1);
+            TutorialMenu.Show(Tutorial.Green);
+        }
+        else if (obj.Color == ProjectileColor.Blue && (IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialThree")))
+        {
+            Time.timeScale = 0;
+            Screen.lockCursor = false;
+            PlayerPrefs.SetInt("TutorialThree", 1);
+            TutorialMenu.Show(Tutorial.Blue);
+        }
     }
 
     private void OnLevelRetry(LevelRetryMessage obj)
@@ -169,6 +199,13 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1;
         GameMode = IsEndless ? GameMode.Endless : GameMode.Story;
         Debug.Log("GameManager Started with " + PlayerName);
+        if ((IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialControls")))
+        {
+            Time.timeScale = 0;
+            Screen.lockCursor = false;
+            PlayerPrefs.SetInt("TutorialControls", 1);
+            TutorialMenu.Show(Tutorial.Controls);
+        }
     }
 
     private void SetupBGM()
@@ -294,6 +331,7 @@ public class GameManager : MonoBehaviour
         }
         _waveText.Commit();
         _waveAnimation.Play();
+        
         Invoke("FireWaveMessage", 2);
     }
 

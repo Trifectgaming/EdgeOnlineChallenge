@@ -16,9 +16,12 @@ public class EnemyManager : GameSceneObject
     private Transform _transform;
     private int _currentRail;
     private bool _waveStarted;
+    private HashSet<ProjectileColor> fired;
+    private ProjectileFirstFiredMessage delayMessage;
 
     protected override void Start ()
 	{
+        fired = new HashSet<ProjectileColor>();
         _transform = transform;
         Setup();
 
@@ -134,6 +137,13 @@ public class EnemyManager : GameSceneObject
                     projectileToFire.transform.position = new Vector3(_transform.position.x, _transform.position.y, projectileToFire.transform.position.z);
                     projectileToFire.Launch(info.Item1.speed, ForceMode);
                     projectileToFire.CurrentRail = _currentRail;
+                    if (!fired.Contains(color))
+                    {
+                        Debug.Log("Sending First Fired");
+                        delayMessage = new ProjectileFirstFiredMessage(color);
+                        Invoke("SendDelayedMessage", 1);
+                        fired.Add(color);
+                    }
                 }
                 else
                 {
@@ -145,6 +155,12 @@ public class EnemyManager : GameSceneObject
             }
             yield return new WaitForSeconds(launchDelaySeconds);
         }
+    }
+
+    private void SendDelayedMessage()
+    {
+        Messenger.Default.Send(delayMessage);
+        Debug.Log("Sent First Fired");
     }
 
     private void ResetAllProjectiles()
@@ -163,5 +179,15 @@ public class EnemyManager : GameSceneObject
     private bool CheckIfAllProjectilesHaveImpacted()
     {
         return _projectileQueue.All(tuple => !tuple.Value.Item2.Any(projectile => projectile.enabled));
+    }
+}
+
+public class ProjectileFirstFiredMessage
+{
+    public ProjectileColor Color;
+
+    public ProjectileFirstFiredMessage(ProjectileColor color)
+    {
+        Color = color;
     }
 }

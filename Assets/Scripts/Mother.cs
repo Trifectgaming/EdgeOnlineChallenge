@@ -9,6 +9,7 @@ public class Mother : MonoBehaviour
     public string spriteNameTemplate;
     public int spriteStart;
     public int spriteEnd;
+    private bool _isStarted;
 
     void Awake()
     {
@@ -17,6 +18,7 @@ public class Mother : MonoBehaviour
 
     private void OnLevelStart(LevelStartMessage obj)
     {
+        if (!_isStarted) return;
         ResetRailDamage();
     }
 
@@ -38,13 +40,15 @@ public class Mother : MonoBehaviour
     }
 
     void Start ()
-	{
-	    DamageDecals = gameObject.GetComponentsInChildren<tk2dSprite>()
+    {
+        if (_isStarted) return;
+        DamageDecals = gameObject.GetComponentsInChildren<tk2dSprite>()
             .OrderBy(t=>t.name)
             .ToArray();
         DamageAnims = gameObject.GetComponentsInChildren<tk2dAnimatedSprite>()
             .OrderBy(t => t.name)
             .ToArray();
+        _isStarted = true;
 	}
 	
 	// Update is called once per frame
