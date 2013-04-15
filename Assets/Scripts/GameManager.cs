@@ -126,7 +126,7 @@ public class GameManager : MonoBehaviour
         _isScoring = false;
         _isGameOver = false;
         var level = Levels[_currentLevel];
-        _currentWaveCount = 0;        
+        _currentWaveCount = 0;
         BGM = level.BGM;
         SetupBGM();
         Background.material = level.Background;

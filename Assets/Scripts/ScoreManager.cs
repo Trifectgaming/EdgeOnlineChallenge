@@ -23,6 +23,15 @@ public class ScoreManager : GameSceneObject
         Messenger.Default.Register<LevelStartMessage>(this, OnLevelStartMessage);
         Messenger.Default.Register<GameWonMessage>(this, OnGameWon);
         Messenger.Default.Register<GameOverMessage>(this, OnGameOver);
+        Messenger.Default.Register<LevelRetryMessage>(this, OnRetry);
+    }
+
+    private void OnRetry(LevelRetryMessage obj)
+    {
+        if (GameManager.IsEndless)
+        {
+            Start();
+        }
     }
 
     private void OnGameOver(GameOverMessage obj)
@@ -55,12 +64,12 @@ public class ScoreManager : GameSceneObject
     private void OnLevelStartMessage(LevelStartMessage obj)
     {
         _gameOver = false;
-        SetScore();
+        SetScore(totalScore);
     }
 
-    private void SetScore()
+    private void SetScore(long score)
     {
-        scoreText.text = "Score: " + totalScore;
+        scoreText.text = "Score: " + score;
         scoreText.Commit();
     }
 
@@ -69,6 +78,7 @@ public class ScoreManager : GameSceneObject
         blocked = 0;
         misses = 0;
 	    motherHits = 0;
+        totalScore = 0;
         base.Start();
         if (GameManager.IsEndless)
             StartCoroutine(EndlessScoreUpdate());
@@ -79,8 +89,8 @@ public class ScoreManager : GameSceneObject
         while (true)
         {
             if (_gameOver) break;
-            Calculate(false);
-            SetScore();
+            var info  = Calculate(false);
+            SetScore(info.TotalScore);
             yield return new WaitForSeconds(scoreUpdateDelay);
             if (_gameOver) break;
         }
@@ -92,17 +102,26 @@ public class ScoreManager : GameSceneObject
         var missPts = misses*MissAdj;
         var motherHitPts = motherHits*MotherHitAdj;
         var total = blockedPts + missPts + motherHitPts;
+        var totalToReport = totalScore;
         if (GameManager.IsEndless)
         {
-            totalScore = total;
+            if (!gameOver)
+            {
+                totalScore = total;
+            }
+            totalToReport = totalScore;
         }
         else
         {
-            totalScore += total;
+            if (!gameOver)
+            {
+                totalScore += total;                
+            }
+            totalToReport += total;
         }
         int position;
-        if (LeaderBoardManager.CheckHighScore(totalScore, out position) && gameOver)
-            LeaderBoardManager.SetHighScore(GameManager.PlayerName, totalScore);
+        if (LeaderBoardManager.CheckHighScore(totalToReport, out position) && gameOver)
+            LeaderBoardManager.SetHighScore(GameManager.PlayerName, totalToReport);
         var result = new ScoreInfo
                    {
                        HitsBlocked = blocked,
@@ -112,10 +131,10 @@ public class ScoreManager : GameSceneObject
                        MotherHits = motherHits,
                        MotherHitsPts = motherHitPts,
                        LevelTotal = total,
-                       TotalScore = totalScore,
+                       TotalScore = totalToReport,
                        position = position,
                    };
-        if (!GameManager.IsEndless)
+        if (!GameManager.IsEndless || gameOver)
         {
             blocked = 0;
             misses = 0;

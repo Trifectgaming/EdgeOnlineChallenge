@@ -74,11 +74,14 @@ public class LeaderBoardManager : MonoBehaviour
         position = -1;
         List<PlayerScore> scores;
         if (!Scores.TryGetValue(GameManager.GameMode, out scores)) return false;
-        foreach (var playerScore in scores)
+        for (int index = 0; index < scores.Count; index++)
         {
-            position++;
+            var playerScore = scores[index];
             if (score > playerScore.Score)
+            {
+                position = index;
                 break;
+            }
         }
         return position > -1;
     }
@@ -147,17 +150,17 @@ public static class DefaultScores
     public static string GetDefaultFor(GameMode mode)
     {
         if (mode == GameMode.Story)
-            return "JRH|" + Random.Range(1000,10000) +
-                   ",RAP|" + Random.Range(1000, 10000) +
-                   ",RG|" + Random.Range(1000, 10000) +
-                   ",AG|" + Random.Range(1000, 10000) +
-                   ",BLH|" + Random.Range(1000, 10000);
+            return "JRH|" + Random.Range(1,10) * 1000 +
+                   ",RAP|" + Random.Range(1, 10) * 1000 +
+                   ",RG|" + Random.Range(1, 10) * 1000 +
+                   ",AG|" + Random.Range(1, 10) * 1000 +
+                   ",BLH|" + Random.Range(1, 10) * 1000;
         if (mode == GameMode.Endless)
-            return "JRH|" + Random.Range(1000, 100000) +
-                   ",RAP|" + Random.Range(1000, 100000) +
-                   ",RG|" + Random.Range(1000, 100000) +
-                   ",AG|" + Random.Range(1000, 100000) +
-                   ",BLH|" + Random.Range(1000, 100000);
+            return "JRH|" + Random.Range(1, 10) * 1000 +
+                   ",RAP|" + Random.Range(1, 10) * 1000 +
+                   ",RG|" + Random.Range(1, 10) * 1000 +
+                   ",AG|" + Random.Range(1, 10) * 1000 +
+                   ",BLH|" + Random.Range(1, 10) * 1000;
         return string.Empty;
     }
 }

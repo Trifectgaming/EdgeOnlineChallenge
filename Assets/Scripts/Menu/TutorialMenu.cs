@@ -18,7 +18,7 @@ public class TutorialMenu : MonoBehaviour
         
     }
 
-    private void Reset()
+    protected void Reset()
     {
         RedTutorial.alpha = 0;
         GreenTutorial.alpha = 0;
@@ -31,7 +31,7 @@ public class TutorialMenu : MonoBehaviour
         Continue();
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -39,13 +39,13 @@ public class TutorialMenu : MonoBehaviour
         }
     }
 
-    private void Continue()
+    protected virtual void Continue()
     {
         Messenger.Default.Send(new GameResumeMessage());
         gameObject.SetActive(false);
     }
 
-    public void Show(Tutorial tutorial)
+    public virtual void Show(Tutorial tutorial)
     {
         Messenger.Default.Send(new GamePausedMessage());
         Reset();

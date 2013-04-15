@@ -5,6 +5,10 @@ public class MainMenuManager : MonoBehaviour {
     public UIInput input;
     public MainMenuBtn storyButton;
     public MainMenuBtn endlessButton;
+    public UIButtonHandler controlsButton;
+    public UIButtonHandler creditsButton;
+    public TutorialContinMenu TutorialContinMenu;
+    public CreditMenu CreditMenu;
     private string key = "PlayerName";
 
     void Awake()
@@ -19,6 +23,14 @@ public class MainMenuManager : MonoBehaviour {
                                      SavePlayerName();
                                      GameManager.IsEndless = true;
                                  };
+        controlsButton.Click += (sender, args) =>
+        {
+            TutorialContinMenu.Show(Tutorial.Controls);
+        };
+        creditsButton.Click += (sender, args) =>
+        {
+            CreditMenu.Show();
+        };
     }
 
     private void SavePlayerName()
