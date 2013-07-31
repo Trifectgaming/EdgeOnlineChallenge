@@ -30,12 +30,13 @@ public class ProjectileBase : MonoBehaviour
         _speed = speed;
         _mode = mode;
         enabled = true;
+        gameObject.SetActive(true);
         var r = rigidbody;
         r.velocity = Vector3.zero;
         r.angularVelocity = Vector3.zero;
         r.inertiaTensorRotation = Quaternion.identity;
         r.rotation = Quaternion.identity;
-        //r.inertiaTensor = Vector3.zero;
+        r.inertiaTensor = new Vector3(1,1,1);
         r.isKinematic = true;
         r.isKinematic = false;
         renderer.enabled = true;
@@ -56,9 +57,10 @@ public class ProjectileBase : MonoBehaviour
 
     public void Reset()
     {
+        enabled = false;
         renderer.enabled = false;
         transform.position = initialPosition;
-        enabled = false;
+        gameObject.SetActive(false);
         if (thruster) thruster.Stop(true);
     }
 }
