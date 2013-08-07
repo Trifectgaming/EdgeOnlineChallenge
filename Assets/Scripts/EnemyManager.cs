@@ -25,7 +25,7 @@ public class EnemyManager : GameSceneObject
         _transform = transform;
         Setup();
 
-        StartCoroutine(Begin());
+        StartCoroutine(LaunchProjectile());
         
         base.Start();
 	}
@@ -44,14 +44,7 @@ public class EnemyManager : GameSceneObject
             }
         }
     }
-
-    private IEnumerator Begin()
-    {
-        StartCoroutine(UpdatePosition());
-        yield return new WaitForSeconds(positionUpdateDelaySeconds);
-        StartCoroutine(LaunchProjectile());
-    }
-
+    
     private void Update()
     {
         
@@ -108,21 +101,6 @@ public class EnemyManager : GameSceneObject
         Messenger.Default.Send(new WaveEndMessage());
     }
 
-    private IEnumerator UpdatePosition()
-    {
-        while (true)
-        {
-            if (_waveStarted)
-            {
-                var laneCount = GameManager.GetLanes();
-                _currentRail = Random.Range(0, laneCount);
-                var newPosition = new Vector3(_transform.position.x, GameManager.GetRails()[_currentRail].Center ,0);
-                _transform.position = newPosition;
-            }
-            yield return new WaitForSeconds(positionUpdateDelaySeconds);
-        }
-    }
-
     private IEnumerator LaunchProjectile()
     {
         while (true)
@@ -131,19 +109,9 @@ public class EnemyManager : GameSceneObject
             {
                 if (_projectileColors.Count > 0)
                 {
-                    var color = _projectileColors.Dequeue();
-                    var info = _projectileQueue[color];
-                    var projectileToFire = info.Item2.Next();
-                    projectileToFire.transform.position = new Vector3(_transform.position.x, _transform.position.y, projectileToFire.transform.position.z);
-                    projectileToFire.Launch(info.Item1.speed, ForceMode);
-                    projectileToFire.CurrentRail = _currentRail;
-                    if (!fired.Contains(color))
-                    {
-                        Debug.Log("Sending First Fired");
-                        delayMessage = new ProjectileFirstFiredMessage(color);
-                        Invoke("SendDelayedMessage", 1);
-                        fired.Add(color);
-                    }
+                    UpdatePosition();
+
+                    FireProjectile();
                 }
                 else
                 {
@@ -155,6 +123,37 @@ public class EnemyManager : GameSceneObject
             }
             yield return new WaitForSeconds(launchDelaySeconds);
         }
+    }
+
+    private void FireProjectile()
+    {
+        var color = _projectileColors.Dequeue();
+        var info = _projectileQueue[color];
+        var projectileToFire = info.Item2.Next();
+        projectileToFire.transform.position = new Vector3(_transform.position.x, _transform.position.y,
+                                                          projectileToFire.transform.position.z);
+        projectileToFire.Launch(info.Item1.speed, ForceMode);
+        projectileToFire.CurrentRail = _currentRail;
+        if (!fired.Contains(color))
+        {
+            Debug.Log("Sending First Fired");
+            delayMessage = new ProjectileFirstFiredMessage(color);
+            Invoke("SendDelayedMessage", 1);
+            fired.Add(color);
+        }
+    }
+
+    private void UpdatePosition()
+    {
+        var laneCount = GameManager.GetLanes();
+        var changeRail = Random.Range(0, laneCount);
+        while (changeRail == _currentRail)
+        {
+            changeRail = Random.Range(0, laneCount);
+        }
+        _currentRail = changeRail;
+        var newPosition = new Vector3(_transform.position.x, GameManager.GetRails()[_currentRail].Center, 0);
+        _transform.position = newPosition;
     }
 
     private void SendDelayedMessage()

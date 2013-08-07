@@ -6,7 +6,8 @@ public class ProjectileBase : MonoBehaviour
 {
     public ProjectileColor ProjectileColor;
     private Rigidbody _rigidbody;
-    public float _speed;
+    public float Speed;
+    public float Velocity;
     private ForceMode _mode;
     public Vector3 initialPosition;
     public float EffectTime = 0;
@@ -27,7 +28,7 @@ public class ProjectileBase : MonoBehaviour
 
     public void Launch(float speed, ForceMode mode)
     {
-        _speed = speed;
+        Speed = speed;
         _mode = mode;
         enabled = true;
         gameObject.SetActive(true);
@@ -52,7 +53,8 @@ public class ProjectileBase : MonoBehaviour
 
     void FixedUpdate()
     {
-        rigidbody.AddForce(Vector3.left * _speed, _mode);
+        rigidbody.AddForce(Vector3.left * Speed, _mode);
+        Velocity = rigidbody.velocity.x;
     }
 
     public void Reset()
