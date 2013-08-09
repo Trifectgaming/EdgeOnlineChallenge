@@ -10,7 +10,8 @@ public class EnemyManager : GameSceneObject
     public float launchDelaySeconds = 1f;
     public float positionUpdateDelaySeconds = .5f;
     public ForceMode ForceMode;
-    
+    public float ProjectileOffset = 10;
+
     private Dictionary<ProjectileColor, Tuple<ProjectileInfo, RecycleQueue<ProjectileBase>>> _projectileQueue; 
     private Queue<ProjectileColor> _projectileColors;
     private Transform _transform;
@@ -23,12 +24,21 @@ public class EnemyManager : GameSceneObject
 	{
         fired = new HashSet<ProjectileColor>();
         _transform = transform;
+        PlaceManagerAtEdge();
         Setup();
 
         StartCoroutine(LaunchProjectile());
         
         base.Start();
 	}
+
+    private void PlaceManagerAtEdge()
+    {
+        if (UIHelper.MaxX != (_transform.position.x + ProjectileOffset))
+        {
+            _transform.position = new Vector3(UIHelper.MaxX + ProjectileOffset, _transform.position.y);
+        }
+    }
 
     private void Setup()
     {
@@ -47,7 +57,7 @@ public class EnemyManager : GameSceneObject
     
     private void Update()
     {
-        
+        PlaceManagerAtEdge();
     }
 
     protected override void Awake()

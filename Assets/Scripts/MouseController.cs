@@ -9,18 +9,17 @@ public class MouseSensitivity
     public float sensitivityY = 1;
 }
 
-public class MouseController : GameSceneObject
+public class ControllerBase : GameSceneObject
 {
-    public MouseSensitivity Sensitivity;
     public float minXOffset;
     public float maxXOffset;
     public float minYOffset;
     public float maxYOffset;
-    private float maxY;
-    private float minY;
-    private Transform _transform;
-    private float maxX;
-    private float minX;
+    protected float maxY;
+    protected float minY;
+    protected Transform myTransform;
+    protected float maxX;
+    protected float minX;
 
     protected override void Awake()
     {
@@ -52,14 +51,19 @@ public class MouseController : GameSceneObject
     }
 
     protected override void Start ()
-	{
-	    _transform = transform;
+    {
+        myTransform = transform;
         maxY = UIHelper.MaxY - maxYOffset;
-	    minY = -maxY + minYOffset;
+        minY = -maxY + minYOffset;
         maxX = UIHelper.MaxX - maxXOffset;
         minX = -maxX + minXOffset;
         base.Start();
-	}
+    }
+}
+
+public class MouseController : ControllerBase
+{
+    public MouseSensitivity Sensitivity;
 
     void Update ()
 	{
@@ -68,15 +72,15 @@ public class MouseController : GameSceneObject
 	    moveDownY += y*Sensitivity.sensitivityY;
 	    if (y != 0.0f)
 	    {
-            if (_transform.position.y > maxY)
+            if (myTransform.position.y > maxY)
             {
-                _transform.position = new Vector3(_transform.position.x, maxY);
+                myTransform.position = new Vector3(myTransform.position.x, maxY);
             }
-            if (_transform.position.y < minY)
+            if (myTransform.position.y < minY)
             {
-                _transform.position = new Vector3(_transform.position.x, minY);
+                myTransform.position = new Vector3(myTransform.position.x, minY);
             }
-            _transform.Translate(Vector3.up * moveDownY);
+            myTransform.Translate(Vector3.up * moveDownY);
 	    }
 
         float moveDownX = 0.0f;
@@ -84,15 +88,15 @@ public class MouseController : GameSceneObject
         moveDownX += x * Sensitivity.sensitivityX;
 	    if (x != 0.0f)
 	    {
-            if (_transform.position.x > maxX)
+            if (myTransform.position.x > maxX)
             {
-                _transform.position = new Vector3(maxX,_transform.position.y);
+                myTransform.position = new Vector3(maxX,myTransform.position.y);
             }
-            if (_transform.position.x < minX)
+            if (myTransform.position.x < minX)
             {
-                _transform.position = new Vector3(minX, _transform.position.y);
+                myTransform.position = new Vector3(minX, myTransform.position.y);
             }
-            _transform.Translate(Vector3.right * moveDownX);
+            myTransform.Translate(Vector3.right * moveDownX);
 	    }
 	}
 }

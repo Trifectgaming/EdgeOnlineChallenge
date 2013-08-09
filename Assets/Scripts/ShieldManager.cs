@@ -16,6 +16,7 @@ public class ShieldManager : GameSceneObject
     private Transform _transform;
     private Shield previousShield;
     public float changeRate;
+    private decimal _lastFinger;
     // Use this for initialization
     protected override void Awake()
     {
@@ -41,13 +42,6 @@ public class ShieldManager : GameSceneObject
     protected override void Start ()
 	{
 	    _transform = transform;
-        //foreach (Shield t in shields)
-        //{
-        //    //t.transform.localScale = new Vector3(1, 1, 1);
-        //    t.Shrink();
-        //}
-
-        //SetCurrent(shields[0]);
         base.Start();
 	}
 
@@ -57,7 +51,6 @@ public class ShieldManager : GameSceneObject
         currentShield = shield;
         if (previousShield != null) previousShield.Shrink();
         currentShield.Grow();
-        //currentShield.Transform.localScale = new Vector3(0.2f, 4, 1);
         float angle;
         Vector3 axis;
         currentShield.transform.localRotation.ToAngleAxis(out angle, out axis);
@@ -66,21 +59,41 @@ public class ShieldManager : GameSceneObject
 
     // Update is called once per frame
 	void Update () {
-        
-        if (Input.GetMouseButtonDown(0))
-        {
-            SetCurrent(GetNextShield());
-        }
-        else if (Input.GetMouseButtonDown(1))
-        {
-            SetCurrent(GetPreviousShield());            
-        }
-	    if (previousShield != null)
+	    if (Input.touchCount == 0)
 	    {
-	        //previousShield.Transform.localScale = Vector3.Lerp(previousShield.Transform.localScale, deactiveShield, Time.deltaTime * changeRate);
+	        if (Input.GetMouseButtonDown(0))
+	        {
+	            SetCurrent(GetNextShield());
+	        }
+	        else if (Input.GetMouseButtonDown(1))
+	        {
+	            SetCurrent(GetPreviousShield());
+	        }
 	    }
-        //currentShield.Transform.localScale = Vector3.Lerp(currentShield.Transform.localScale, activeShield, Time.deltaTime * changeRate);
-	    _transform.rotation = Quaternion.Slerp(_transform.rotation, finalRotation, Time.deltaTime * rotationRate);
+	    else
+	    {
+	        var count = Input.touchCount;
+	        for (int i = 0; i < count; i++)
+	        {
+	            var touch = Input.touches[i];
+	            if (touch.fingerId == _lastFinger)
+	            {
+	                if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+	                    _lastFinger = -1;
+	                continue;
+	            }
+                if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                    continue;
+	            foreach (var touchpad in Touchpad.Touchpads)
+	            {
+	                if (touchpad.IsLatched(touch.fingerId))
+                        continue;
+	                SetCurrent(GetNextShield());
+	                _lastFinger = touch.fingerId;
+	            }
+	        }
+	    }
+        _transform.rotation = Quaternion.Slerp(_transform.rotation, finalRotation, Time.deltaTime * rotationRate);
 	}
 
     private Shield GetPreviousShield()

@@ -10,6 +10,8 @@ public class Mother : MonoBehaviour
     public int spriteStart;
     public int spriteEnd;
     private bool _isStarted;
+    private Transform _transform;
+    private float _motherWidth;
 
     void Awake()
     {
@@ -42,6 +44,9 @@ public class Mother : MonoBehaviour
     void Start ()
     {
         if (_isStarted) return;
+        _motherWidth = GetComponent<tk2dSprite>().GetBounds().size.x * .5f;
+        _transform = transform;
+        PlaceMotherAtEdge();
         DamageDecals = gameObject.GetComponentsInChildren<tk2dSprite>()
             .OrderBy(t=>t.name)
             .ToArray();
@@ -51,10 +56,18 @@ public class Mother : MonoBehaviour
         _isStarted = true;
 	}
 	
-	// Update is called once per frame
-	void Update () {
-	
+	void Update ()
+	{
+	    PlaceMotherAtEdge();
 	}
+
+    private void PlaceMotherAtEdge()
+    {
+        if (UIHelper.MinX != (_transform.position.x + _motherWidth))
+        {
+            _transform.position = new Vector3(UIHelper.MinX + _motherWidth, _transform.position.y);
+        }
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
