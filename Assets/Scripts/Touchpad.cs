@@ -33,9 +33,16 @@ public class Touchpad : MonoBehaviour {
     private Vector2 guiTouchOffset;				                // Offset to apply to touch input
     private Vector2 guiCenter;  					            // Center of joystick
 
+    void Awake()
+    {
+        Touchpads = new Touchpad[0];
+        Debug.Log("Touch pad awoken");
+    }
+
 	void Start ()
 	{
-	    gui = GetComponent<GUITexture>();
+        enumeratedJoysticks = false;
+        gui = GetComponent<GUITexture>();
 	    defaultRect = gui.pixelInset;
 
 	    defaultRect.x += transform.position.x*Screen.width;
@@ -135,7 +142,7 @@ public class Touchpad : MonoBehaviour {
                     if (touchZone.Contains(touch.position))
                         shouldLatchFinger = true;
                 }
-                else if (gui.HitTest(touch.position))
+                else if (HitTest(touch.position))
                 {
                     shouldLatchFinger = true;
                 }
@@ -234,5 +241,10 @@ public class Touchpad : MonoBehaviour {
             // Rescale the output after taking the dead zone into account
             position.y = Mathf.Sign(position.y)*(absoluteY - deadZone.y)/(1 - deadZone.y);
         }
+    }
+
+    public bool HitTest(Vector2 p)
+    {
+        return gui.HitTest(p);
     }
 }

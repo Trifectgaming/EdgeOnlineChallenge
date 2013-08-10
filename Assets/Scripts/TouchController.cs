@@ -43,7 +43,6 @@ public class TouchController : ControllerBase
 
         movement += velocity;
         movement *= Time.deltaTime;
-        Debug.Log("Movement = " + movement);
 
         float moveDownY = 0.0f;
         var y = movement.y;

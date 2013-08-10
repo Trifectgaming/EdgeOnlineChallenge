@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using System.Collections;
 
@@ -9,14 +10,18 @@ public class ShieldManager : GameSceneObject
     public float shieldCycleDelay = .2f;
     public Vector3 activeShield;
     public Vector3 deactiveShield;
-    private Shield currentShield;
-    private int currentIndex;
     public Quaternion finalRotation;
     public Shield[] shields;
+    public float changeRate;
+    public GUITexture SpinLeft;
+    public GUITexture SpinRight;
+
+    private Shield currentShield;
+    private int currentIndex;  
     private Transform _transform;
     private Shield previousShield;
-    public float changeRate;
-    private decimal _lastFinger;
+    public int LastFinger = -1;
+    
     // Use this for initialization
     protected override void Awake()
     {
@@ -76,25 +81,50 @@ public class ShieldManager : GameSceneObject
 	        for (int i = 0; i < count; i++)
 	        {
 	            var touch = Input.touches[i];
-	            if (touch.fingerId == _lastFinger)
+                if (touch.fingerId == LastFinger)
 	            {
-	                if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
-	                    _lastFinger = -1;
+                    if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                        LastFinger = -1;
+                    Debug.Log("Finger " + touch.fingerId + " was last finger.");
 	                continue;
 	            }
                 if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
                     continue;
-	            foreach (var touchpad in Touchpad.Touchpads)
+	            if (Touchpad.Touchpads.Any(t => t.HitTest(touch.position)))
+	                continue;
+	            if (SpinLeft && SpinLeft.HitTest(touch.position))
 	            {
-	                if (touchpad.IsLatched(touch.fingerId))
-                        continue;
 	                SetCurrent(GetNextShield());
-	                _lastFinger = touch.fingerId;
+                    ReduceAlpha(SpinLeft, .80f);
 	            }
+                if (SpinRight && SpinRight.HitTest(touch.position))
+                {
+                    SetCurrent(GetPreviousShield());
+                    ReduceAlpha(SpinLeft, .80f);
+                }
+                LastFinger = touch.fingerId;
+	            StartCoroutine(UnphaseButtons());
 	        }
 	    }
         _transform.rotation = Quaternion.Slerp(_transform.rotation, finalRotation, Time.deltaTime * rotationRate);
 	}
+
+    IEnumerator UnphaseButtons()
+    {
+        yield return new WaitForSeconds(1);
+        RestoreAlpha(SpinLeft);
+        RestoreAlpha(SpinRight);
+    }
+
+    private void RestoreAlpha(GUITexture texture)
+    {
+        texture.color = new Color(texture.color.r, texture.color.g, texture.color.b, 1);
+    }
+
+    private void ReduceAlpha(GUITexture texture, float a)
+    {
+        texture.color = new Color(texture.color.r, texture.color.g, texture.color.b, a);
+    }
 
     private Shield GetPreviousShield()
     {
