@@ -95,12 +95,12 @@ public class ShieldManager : GameSceneObject
 	            if (SpinLeft && SpinLeft.HitTest(touch.position))
 	            {
 	                SetCurrent(GetNextShield());
-                    ReduceAlpha(SpinLeft, .80f);
+                    RestoreAlpha(SpinLeft);
 	            }
                 if (SpinRight && SpinRight.HitTest(touch.position))
                 {
                     SetCurrent(GetPreviousShield());
-                    ReduceAlpha(SpinLeft, .80f);
+                    RestoreAlpha(SpinRight);
                 }
                 LastFinger = touch.fingerId;
 	            StartCoroutine(UnphaseButtons());
@@ -112,8 +112,8 @@ public class ShieldManager : GameSceneObject
     IEnumerator UnphaseButtons()
     {
         yield return new WaitForSeconds(1);
-        RestoreAlpha(SpinLeft);
-        RestoreAlpha(SpinRight);
+        ReduceAlpha(SpinLeft, .3f);
+        ReduceAlpha(SpinRight, .3f);
     }
 
     private void RestoreAlpha(GUITexture texture)

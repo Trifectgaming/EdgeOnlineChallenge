@@ -1,7 +1,17 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System.Collections;
+using Random = UnityEngine.Random;
+
+[Serializable]
+public class ProjectileOffset
+{
+    public ProjectileColor color;
+    public float offset;
+    public float zOffset;
+}
 
 public class EnemyManager : GameSceneObject
 {
@@ -11,6 +21,7 @@ public class EnemyManager : GameSceneObject
     public float positionUpdateDelaySeconds = .5f;
     public ForceMode ForceMode;
     public float ProjectileOffset = 10;
+    public List<ProjectileOffset> offsets = new List<ProjectileOffset>();
 
     private Dictionary<ProjectileColor, Tuple<ProjectileInfo, RecycleQueue<ProjectileBase>>> _projectileQueue; 
     private Queue<ProjectileColor> _projectileColors;
@@ -140,8 +151,9 @@ public class EnemyManager : GameSceneObject
         var color = _projectileColors.Dequeue();
         var info = _projectileQueue[color];
         var projectileToFire = info.Item2.Next();
-        projectileToFire.transform.position = new Vector3(_transform.position.x, _transform.position.y,
-                                                          projectileToFire.transform.position.z);
+        var cInfo = offsets.First(c=>c.color == color);
+        projectileToFire.transform.position = new Vector3(_transform.position.x, _transform.position.y + cInfo.offset,
+                                                          cInfo.zOffset);
         projectileToFire.Launch(info.Item1.speed, ForceMode);
         projectileToFire.CurrentRail = _currentRail;
         if (!fired.Contains(color))
