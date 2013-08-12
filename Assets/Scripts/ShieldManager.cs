@@ -68,7 +68,23 @@ public class ShieldManager : GameSceneObject
 	    {
 	        if (Input.GetMouseButtonDown(0))
 	        {
-	            SetCurrent(GetNextShield());
+                Debug.Log("Left Hit Test: " + SpinLeft.HitTest(Input.mousePosition));
+                Debug.Log("Right Hit Test: " + SpinRight.HitTest(Input.mousePosition));
+                if (SpinLeft && SpinLeft.HitTest(Input.mousePosition))
+                {
+                    SetCurrent(GetNextShield());
+                    RestoreAlpha(SpinLeft);
+                }
+                else if (SpinRight && SpinRight.HitTest(Input.mousePosition))
+                {
+                    SetCurrent(GetPreviousShield());
+                    RestoreAlpha(SpinRight);
+                }
+                else
+                {
+                    SetCurrent(GetNextShield());
+                }
+                StartCoroutine(UnphaseButtons());
 	        }
 	        else if (Input.GetMouseButtonDown(1))
 	        {
@@ -103,8 +119,8 @@ public class ShieldManager : GameSceneObject
                     RestoreAlpha(SpinRight);
                 }
                 LastFinger = touch.fingerId;
-	            StartCoroutine(UnphaseButtons());
 	        }
+            StartCoroutine(UnphaseButtons());
 	    }
         _transform.rotation = Quaternion.Slerp(_transform.rotation, finalRotation, Time.deltaTime * rotationRate);
 	}
@@ -112,8 +128,8 @@ public class ShieldManager : GameSceneObject
     IEnumerator UnphaseButtons()
     {
         yield return new WaitForSeconds(1);
-        ReduceAlpha(SpinLeft, .3f);
-        ReduceAlpha(SpinRight, .3f);
+        ReduceAlpha(SpinLeft, .2f);
+        ReduceAlpha(SpinRight, .2f);
     }
 
     private void RestoreAlpha(GUITexture texture)
