@@ -68,8 +68,6 @@ public class ShieldManager : GameSceneObject
 	    {
 	        if (Input.GetMouseButtonDown(0))
 	        {
-                Debug.Log("Left Hit Test: " + SpinLeft.HitTest(Input.mousePosition));
-                Debug.Log("Right Hit Test: " + SpinRight.HitTest(Input.mousePosition));
                 if (SpinLeft && SpinLeft.HitTest(Input.mousePosition))
                 {
                     SetCurrent(GetNextShield());
@@ -82,7 +80,8 @@ public class ShieldManager : GameSceneObject
                 }
                 else
                 {
-                    SetCurrent(GetNextShield());
+                    CheckPositionCollisiion(Input.mousePosition);
+                    //SetCurrent(GetNextShield());
                 }
                 StartCoroutine(UnphaseButtons());
 	        }
@@ -122,8 +121,29 @@ public class ShieldManager : GameSceneObject
 	        }
             StartCoroutine(UnphaseButtons());
 	    }
-        _transform.rotation = Quaternion.Slerp(_transform.rotation, finalRotation, Time.deltaTime * rotationRate);
+	    foreach (var touch in Input.touches)
+	    {
+	        var position = touch.position;
+            CheckPositionCollisiion(position);
+	    }
+	    _transform.rotation = Quaternion.Slerp(_transform.rotation, finalRotation, Time.deltaTime * rotationRate);
 	}
+
+    private void CheckPositionCollisiion(Vector2 position)
+    {
+        var ray = Camera.main.ScreenPointToRay(position);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, 100f))
+        {
+            Debug.Log("Finger touched " + hit.collider.gameObject.name);
+            if (hit.collider.gameObject.tag == "Projectiles")
+            {
+                var projectile = hit.collider.gameObject.GetComponent<ProjectileBase>();
+                var color = projectile.ProjectileColor;
+                SetCurrent(shields.First(t => (int) t.color == (int) color));
+            }
+        }
+    }
 
     IEnumerator UnphaseButtons()
     {
