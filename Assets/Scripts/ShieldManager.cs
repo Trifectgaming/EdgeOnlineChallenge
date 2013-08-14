@@ -121,11 +121,11 @@ public class ShieldManager : GameSceneObject
 	        }
             StartCoroutine(UnphaseButtons());
 	    }
-	    foreach (var touch in Input.touches)
-	    {
-	        var position = touch.position;
-            CheckPositionCollisiion(position);
-	    }
+        //foreach (var touch in Input.touches)
+        //{
+        //    var position = touch.position;
+        //    CheckPositionCollisiion(position);
+        //}
 	    _transform.rotation = Quaternion.Slerp(_transform.rotation, finalRotation, Time.deltaTime * rotationRate);
 	}
 
