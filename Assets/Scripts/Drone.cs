@@ -2,11 +2,11 @@ public class Drone : GameSceneObject
 {
     public tk2dAnimatedSprite sprite;
     public ShieldManager shieldManager;
-    public MouseController controller;
+    //public MouseController controller;
 
     protected override void Start ()
     {
-        controller = GetComponent<MouseController>();
+        //controller = GetComponent<MouseController>();
         base.Start();
     }
 

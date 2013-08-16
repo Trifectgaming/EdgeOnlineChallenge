@@ -9,6 +9,7 @@ public class DamageEffectManager : GameSceneObject
     public Vector3 ImpactForce;
     public MouseSensitivity SlowEffect;
     public Drone Drone;
+    public MouseController Controller;
     public MouseSensitivity previousSensitivity;
     public bool Initialized;
     public MouseSensitivity DisableEffect;
@@ -74,10 +75,11 @@ public class DamageEffectManager : GameSceneObject
             {
                 var parent = transform.parent;
                 Drone = parent.GetComponent<Drone>();
+                Controller = parent.GetComponent<MouseController>();
             }
-            if (Drone != null && Drone.controller != null)
+            if (Drone != null && Controller != null)
             {
-                previousSensitivity = Drone.controller.Sensitivity;
+                previousSensitivity = Controller.Sensitivity;
                 Initialized = true;
             }
         }
@@ -91,9 +93,12 @@ public class DamageEffectManager : GameSceneObject
 
     private void RemoveEffect()
     {
-        CurrentEffect = DamageEffect.None;
-        Drone.controller.Sensitivity = previousSensitivity;
-        effectMaterial.material.SetColor("_TintColor", _originalColor);
+        if (Controller)
+        {
+            CurrentEffect = DamageEffect.None;
+            Controller.Sensitivity = previousSensitivity;
+            effectMaterial.material.SetColor("_TintColor", _originalColor);
+        }
     }
 
     void ApplyEffect()
@@ -103,7 +108,7 @@ public class DamageEffectManager : GameSceneObject
             case DamageEffect.None:
                 return;
             case DamageEffect.Disable:
-                Drone.controller.Sensitivity = DisableEffect;
+                if (Controller != null) Controller.Sensitivity = DisableEffect;
                 effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Repulse:
@@ -117,7 +122,7 @@ public class DamageEffectManager : GameSceneObject
                 effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Slow:
-                Drone.controller.Sensitivity = SlowEffect;
+                if (Controller != null) Controller.Sensitivity = SlowEffect;
                 effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
         }
