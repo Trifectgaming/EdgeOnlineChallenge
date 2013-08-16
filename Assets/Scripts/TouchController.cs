@@ -3,7 +3,7 @@ using System.Collections;
 
 public class TouchController : ControllerBase
 {
-    public Touchpad moveTouchpad;
+    public Control moveTouchpad;
     public float speed = 4;
     public Vector3 velocity;
 
@@ -29,7 +29,6 @@ public class TouchController : ControllerBase
 
         // We only want horizontal movement
         movement.z = 0;
-        movement.Normalize();
         
         // Apply movement from move joystick
         var absJoyPos = new Vector2(Mathf.Abs(moveTouchpad.position.x), Mathf.Abs(moveTouchpad.position.y));
@@ -45,9 +44,7 @@ public class TouchController : ControllerBase
 
         movement += velocity;
         movement *= Time.deltaTime;
-        float moveDownY = 0.0f;
         var y = movement.y;
-        moveDownY += y; // *Sensitivity.sensitivityY;
         if (y != 0.0f)
         {
             if (myTransform.position.y > maxY)
@@ -58,12 +55,9 @@ public class TouchController : ControllerBase
             {
                 myTransform.position = new Vector3(myTransform.position.x, minY);
             }
-            //myTransform.Translate(Vector3.up * moveDownY);
         }
 
-        float moveDownX = 0.0f;
         var x = movement.x;
-        moveDownX += x; // *Sensitivity.sensitivityX;
         if (x != 0.0f)
         {
             if (myTransform.position.x > maxX)
@@ -74,7 +68,6 @@ public class TouchController : ControllerBase
             {
                 myTransform.position = new Vector3(minX, myTransform.position.y);
             }
-            //myTransform.Translate(Vector3.right * moveDownX);
         }
         myTransform.position += movement;
     }

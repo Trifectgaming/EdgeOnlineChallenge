@@ -1,8 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public abstract class Control : MonoBehaviour
+{
+    public abstract void Disable();
+    public abstract void Enable();
+    public Vector2 position;
+}
+
 [RequireComponent(typeof(GUITexture))]
-public class Touchpad : MonoBehaviour {
+public class Touchpad : Control
+{
     
     public class Boundary 
     {
@@ -18,7 +26,6 @@ public class Touchpad : MonoBehaviour {
     public Rect touchZone;
     public Vector2 deadZone = Vector2.zero;						// Control when position is output
     public bool normalize = false; 							    // Normalize output after the dead-zone?
-    public Vector2 position; 									// [-1, 1] in x,y
     public int tapCount;	                                    // Current tap count
 
     private int lastFingerId = -1;								// Finger last used for this joystick
@@ -69,13 +76,13 @@ public class Touchpad : MonoBehaviour {
         }
 	}
 
-    public void Disable()
+    public override void Disable()
     {
         gameObject.SetActive(false);
         enumeratedJoysticks = false;
     }
 
-    public void Enable()
+    public override void Enable()
     {
         gameObject.SetActive(true);
         enumeratedJoysticks = true;
