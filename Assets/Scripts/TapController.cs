@@ -10,7 +10,7 @@ public class TapController : ControllerBase
     public float journeyLength;
     public float speed = 1;
     public Vector2 offset = new Vector2(5,0);
-    public bool remberOffset;
+    public bool rememberOffset;
     
 	void Update ()
 	{
@@ -21,7 +21,7 @@ public class TapController : ControllerBase
             if (screenTouch.phase == TouchPhase.Canceled || screenTouch.phase == TouchPhase.Ended) continue;
 	        
             var pos = (Vector2)Camera.main.ScreenToWorldPoint(screenTouch.position);
-            if (remberOffset && screenTouch.phase == TouchPhase.Began)
+            if (rememberOffset && screenTouch.phase == TouchPhase.Began)
             {
                 offset = new Vector2(transform.position.x - pos.x, 0);
             }
