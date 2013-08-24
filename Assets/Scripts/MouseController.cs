@@ -66,7 +66,8 @@ public class MouseController : ControllerBase
     public MouseSensitivity Sensitivity;
 
     void Update ()
-	{
+    {
+        if (Input.touchCount > 0) return;
         float moveDownY = 0.0f;
 	    var y = Input.GetAxis("Mouse Y");
 	    moveDownY += y*Sensitivity.sensitivityY;
