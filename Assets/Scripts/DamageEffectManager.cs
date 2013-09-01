@@ -38,7 +38,6 @@ public class DamageEffectManager : GameSceneObject
         base.Start();
         CurrentEffect = DamageEffect.None;
         _originalColor = effectMaterial.material.GetColor("_TintColor");
-        //StartCoroutine(DelayForEffect());
     }
 
     private void OnShieldImpact(ShieldImpactMessage obj)
@@ -67,7 +66,6 @@ public class DamageEffectManager : GameSceneObject
     }
 
     void Update()
-    //protected override void OnGameLateResume(GameLateResumeMessage obj)
     {
         if (!Initialized)
         {
@@ -112,7 +110,6 @@ public class DamageEffectManager : GameSceneObject
                 effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Repulse:
-                //Drone.controller.Sensitivity = Repulseffect;
                 var distanceCovered = (Time.deltaTime - _effectTime)*repulseSpeed;
                 var journey = distanceCovered/repulseDistance;
                 Drone.transform.position = Vector3.Lerp(
