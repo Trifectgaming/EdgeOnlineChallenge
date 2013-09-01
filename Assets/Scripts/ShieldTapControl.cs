@@ -32,6 +32,8 @@ public class ShieldTapControl : ShieldControlBase
     public tk2dSprite SpinLeft;
     public tk2dSprite SpinRight;
     public int LastFinger = -1;
+    public float alphaMin = .5f;
+    public float alphaMax = 1;
     private GameObject _spinLeftGo;
     private GameObject _spinRightGo;
 
@@ -152,18 +154,18 @@ public class ShieldTapControl : ShieldControlBase
     IEnumerator UnphaseSpinLeftButton()
     {
         yield return new WaitForSeconds(1);
-        ReduceAlpha(SpinLeft, .2f);
+        ReduceAlpha(SpinLeft, alphaMin);
     }
 
     IEnumerator UnphaseSpinRightButton()
     {
         yield return new WaitForSeconds(1);
-        ReduceAlpha(SpinRight, .2f);
+        ReduceAlpha(SpinRight, alphaMin);
     }
 
     private void RestoreAlpha(tk2dSprite texture)
     {
-        texture.color = new Color(texture.color.r, texture.color.g, texture.color.b, 1);
+        texture.color = new Color(texture.color.r, texture.color.g, texture.color.b, alphaMax);
     }
 
     private void ReduceAlpha(tk2dSprite texture, float a)
