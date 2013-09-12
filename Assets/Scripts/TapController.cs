@@ -23,7 +23,7 @@ public class TapController : ControllerBase
             var pos = (Vector2)Camera.main.ScreenToWorldPoint(screenTouch.position);
             if (rememberOffset && screenTouch.phase == TouchPhase.Began)
             {
-                offset = new Vector2(transform.position.x - pos.x, 0);
+                offset = new Vector2(transform.position.x - pos.x, transform.position.y - pos.y);
             }
             var newPosition = pos + offset;
             //if (newPosition != position)

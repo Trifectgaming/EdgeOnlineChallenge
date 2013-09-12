@@ -82,8 +82,12 @@ public class ScoreMenu : ScoreMenuBase
 {
     protected override void Continue()
     {
-        Screen.lockCursor = true;
-        Messenger.Default.Send(new LevelStartMessage());
-        gameObject.SetActive(false);
+        AdManager.TryShowAd(AdManager.BetweenLevels,
+                            () =>
+                                {
+                                    Screen.lockCursor = true;
+                                    Messenger.Default.Send(new LevelStartMessage());
+                                    gameObject.SetActive(false);
+                                });
     }
 }

@@ -69,6 +69,7 @@ public class GameManager : MonoBehaviour
         }
         else if (obj.Color == ProjectileColor.Green && (IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialTwo")))
         {
+            Debug.Log("Green fired");
             Time.timeScale = 0;
             Screen.lockCursor = false;
             PlayerPrefs.SetInt("TutorialTwo", 1);
@@ -76,6 +77,7 @@ public class GameManager : MonoBehaviour
         }
         else if (obj.Color == ProjectileColor.Blue && (IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialThree")))
         {
+            Debug.Log("Blue fired");
             Time.timeScale = 0;
             Screen.lockCursor = false;
             PlayerPrefs.SetInt("TutorialThree", 1);
@@ -85,7 +87,7 @@ public class GameManager : MonoBehaviour
 
     private void OnLevelRetry(LevelRetryMessage obj)
     {
-        Messenger.Default.Send(new LevelStartMessage());
+        AdManager.TryShowAd(AdManager.BetweenLevels, () => Messenger.Default.Send(new LevelStartMessage()));
     }
 
     private void OnLevelEnd(LevelEndMessage obj)

@@ -13,6 +13,7 @@ public class MainMenuManager : MonoBehaviour {
 
     void Awake()
     {
+        AdManager.Initialize();
         storyButton.Click += (sender, args) =>
                                  {
                                      SavePlayerName();
@@ -39,14 +40,12 @@ public class MainMenuManager : MonoBehaviour {
         PlayerPrefs.SetString(key, GameManager.PlayerName);
     }
 
-    // Use this for initialization
-	void Start ()
+    void Start ()
 	{
 	    if (PlayerPrefs.HasKey(key))
 	        input.text = PlayerPrefs.GetString(key);
 	}
 	
-	// Update is called once per frame
 	void Update () {
 	
 	}
