@@ -1,0 +1,55 @@
+#!/usr/bin/python
+import os
+#from Cocoa import NSDictionary
+import sys
+import re
+from distutils import dir_util
+# heyzaplib_filename = os.path.join(os.getcwd(), r'Assets/Plugins/heyzap.cs')
+
+
+# heyzaplib = open(heyzaplib_filename)
+
+# app_id = ""
+# for line in heyzaplib.readlines():
+#      m = re.search(r'private\s+static\s+string\s+APP_ID\s*=\s*"(\d+)";', line)
+#      if m:
+#          app_id = m.group(1)
+#          break
+
+
+# plist_name = os.path.join(sys.argv[1], 'Info.plist')
+
+# if os.path.exists(plist_name):
+#     mydict = NSDictionary.dictionaryWithContentsOfFile_(plist_name)
+    
+#     mydict['CFBundleURLTypes'] = [{'CFBundleTypeRole' : 'Editor',
+#                                    'CFBundleURLName' : 'app_open',
+#                                    'CFBundleURLSchemes' : ['hz%s'%app_id]}]
+
+#     mydict.writeToFile_atomically_(plist_name, True)
+
+import Pbxproj
+for proj in os.listdir(sys.argv[1]):
+  if not re.search('\.xcodeproj', proj):
+    continue
+
+  proj = os.path.join(sys.argv[1], proj)
+  pb = Pbxproj.Pbxproj(proj)
+
+  # Add the Frameworks
+  pb.add_framework("AdSupport.framework", True) #weak-linked
+  pb.add_framework("StoreKit.framework", True) #weak-linked
+  pb.add_framework("CoreGraphics.framework")
+  pb.add_framework("QuartzCore.framework")
+
+  # Add the linker flags
+  pb.add_build_setting("Release", "OTHER_LDFLAGS", "-ObjC")
+  pb.add_build_setting("Release", "OTHER_LDFLAGS", "-all_load")
+  pb.add_build_setting("Debug", "OTHER_LDFLAGS", "-ObjC")
+  pb.add_build_setting("Debug", "OTHER_LDFLAGS", "-all_load")
+
+  # Copy the bundle into the tree
+  dir_util.copy_tree(os.path.join(os.getcwd(), r'Assets/Plugins/iOS/Heyzap.bundle'), sys.argv[1] + '/Heyzap.bundle')
+
+  # Add the bundle into the project
+  pb.add_bundle('Heyzap.bundle')
