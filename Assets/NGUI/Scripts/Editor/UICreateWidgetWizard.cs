@@ -35,6 +35,7 @@ public class UICreateWidgetWizard : EditorWindow
 	static string mImage0 = "";
 	static string mImage1 = "";
 	static string mImage2 = "";
+	static string mImage3 = "";
 	static string mSliderBG = "";
 	static string mSliderFG = "";
 	static string mSliderTB = "";
@@ -90,6 +91,7 @@ public class UICreateWidgetWizard : EditorWindow
 		SaveString("NGUI Image 0", mImage0);
 		SaveString("NGUI Image 1", mImage1);
 		SaveString("NGUI Image 2", mImage2);
+		SaveString("NGUI Image 3", mImage3);
 		SaveString("NGUI CheckBG", mCheckBG);
 		SaveString("NGUI Check", mCheck);
 		SaveString("NGUI SliderBG", mSliderBG);
@@ -121,6 +123,7 @@ public class UICreateWidgetWizard : EditorWindow
 		mImage0		= LoadString("NGUI Image 0");
 		mImage1		= LoadString("NGUI Image 1");
 		mImage2		= LoadString("NGUI Image 2");
+		mImage3		= LoadString("NGUI Image 3");
 		mCheckBG	= LoadString("NGUI CheckBG");
 		mCheck		= LoadString("NGUI Check");
 		mSliderBG	= LoadString("NGUI SliderBG");
@@ -286,6 +289,7 @@ public class UICreateWidgetWizard : EditorWindow
 				UILabel lbl = NGUITools.AddWidget<UILabel>(go);
 				lbl.font = NGUISettings.font;
 				lbl.text = go.name;
+				if (lbl.font.dynamicFont) lbl.transform.localPosition = new Vector3(0f, 0f, -1f);
 				lbl.MakePixelPerfect();
 			}
 
@@ -315,6 +319,7 @@ public class UICreateWidgetWizard : EditorWindow
 			NGUIEditorTools.SpriteField("Normal", "Normal state sprite", NGUISettings.atlas, mImage0, OnImage0);
 			NGUIEditorTools.SpriteField("Hover", "Hover state sprite", NGUISettings.atlas, mImage1, OnImage1);
 			NGUIEditorTools.SpriteField("Pressed", "Pressed state sprite", NGUISettings.atlas, mImage2, OnImage2);
+			NGUIEditorTools.SpriteField("Disabled", "Disabled state sprite", NGUISettings.atlas, mImage3, OnImage3);
 		}
 
 		if (ShouldCreate(go, NGUISettings.atlas != null))
@@ -338,6 +343,7 @@ public class UICreateWidgetWizard : EditorWindow
 				UILabel lbl = NGUITools.AddWidget<UILabel>(go);
 				lbl.font = NGUISettings.font;
 				lbl.text = go.name;
+				if (lbl.font.dynamicFont) lbl.transform.localPosition = new Vector3(0f, 0f, -1f);
 				lbl.MakePixelPerfect();
 			}
 
@@ -345,11 +351,12 @@ public class UICreateWidgetWizard : EditorWindow
 			NGUITools.AddWidgetCollider(go);
 
 			// Add the scripts
-			UIImageButton ib = go.AddComponent<UIImageButton>();
-			ib.target		 = sprite;
-			ib.normalSprite  = mImage0;
-			ib.hoverSprite	 = mImage1;
-			ib.pressedSprite = mImage2;
+			UIImageButton ib	= go.AddComponent<UIImageButton>();
+			ib.target			= sprite;
+			ib.normalSprite		= mImage0;
+			ib.hoverSprite		= mImage1;
+			ib.pressedSprite	= mImage2;
+			ib.disabledSprite	= mImage3;
 			go.AddComponent<UIButtonSound>();
 
 			Selection.activeGameObject = go;
@@ -359,6 +366,7 @@ public class UICreateWidgetWizard : EditorWindow
 	void OnImage0 (string val) { mImage0 = val; Save(); Repaint(); }
 	void OnImage1 (string val) { mImage1 = val; Save(); Repaint(); }
 	void OnImage2 (string val) { mImage2 = val; Save(); Repaint(); }
+	void OnImage3 (string val) { mImage3 = val; Save(); Repaint(); }
 
 	/// <summary>
 	/// Checkbox creation function.

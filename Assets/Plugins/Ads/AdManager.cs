@@ -6,11 +6,13 @@ using UnityEngine;
 
 public static class AdManager
 {
-    public const string MainMenuTravels = "Main_Menu_Travels";
+    public const string MainMenuTravels = "Main_Menu";
     public const string BetweenLevels = "Between_Levels";
+    public static Action Closed;
     
     private static readonly Dictionary<string, AdExpectation> CanShow = new Dictionary<string, AdExpectation>();
     private static bool _initialized;
+    private static string _adShowing = string.Empty;
 
     public static void Initialize()
     {
@@ -19,6 +21,13 @@ public static class AdManager
         EditorHelper.ExecuteIfNotInEditor(() => HeyzapAds.setDisplayListener(OnAdChanged));
         RegisterAd(BetweenLevels, 5);
         RegisterAd(MainMenuTravels, 2);
+        EditorHelper.ExecuteIfNotInEditor(() => HZInterstitialAd.fetch("Default"), 
+            () => {
+                      foreach (var adExpectation in CanShow)
+                      {
+                          adExpectation.Value.IsReady = true;
+                      }
+            });
         _initialized = true;
     }
 
@@ -34,10 +43,11 @@ public static class AdManager
             AdExpectation expectation;
             if (CanShow.TryGetValue(adName, out expectation) && expectation.ShouldShow())
             {
-                expectation.Closed = dismissed;
-                EditorHelper.ExecuteIfNotInEditor(() => HZInterstitialAd.show(adName), () =>
+                _adShowing = adName;
+                Closed = dismissed;
+                EditorHelper.ExecuteIfNotInEditor(() => HZInterstitialAd.show("Default"), () =>
                                                                                            {
-                                                                                               expectation.Closed = null;
+                                                                                               Closed = null;
                                                                                                if (dismissed != null)
                                                                                                    dismissed();
                                                                                            });
@@ -46,7 +56,7 @@ public static class AdManager
             {
                 if (expectation != null)
                 {
-                    Debug.Log("Expectation not met, ad will show in " + expectation.WillShowIn() + " more event occurances.");
+                    LogHandler.Handle("Expectation not met, ad " + adName + " will show in " + expectation.WillShowIn() + " more event occurances.");
                 }
                 if (dismissed != null)
                 {
@@ -62,16 +72,21 @@ public static class AdManager
 
     private static void OnAdChanged(string state, string tag)
     {
+        LogHandler.Handle("Ad " + _adShowing + " has changed to " + state);
         if (state.Equals("available", StringComparison.InvariantCultureIgnoreCase))
         {
-            CanShow[tag].IsReady = true;
-        }
-        else if (state.Equals("hide", StringComparison.InvariantCultureIgnoreCase))
-        {
-            var callback = CanShow[tag].Closed;
-            if (callback != null)
+            foreach (var adExpectation in CanShow)
             {
-                callback();
+                adExpectation.Value.IsReady = true;                
+            }
+        }
+        else if (state.Equals("hide", StringComparison.InvariantCultureIgnoreCase) || state.Equals("click", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _adShowing = string.Empty;
+            if (Closed != null)
+            {
+                Closed();
+                Closed = null;
             }
         }
     }
@@ -79,7 +94,6 @@ public static class AdManager
     private static void RegisterAd(string adName, int showFrequency)
     {
         CanShow[adName] = new AdExpectation(showFrequency);
-        EditorHelper.ExecuteIfNotInEditor(() => HZInterstitialAd.fetch(adName), () => CanShow[adName].IsReady = true);
     }
 
     private class AdExpectation
@@ -92,8 +106,6 @@ public static class AdManager
         private readonly int _showFrequency;
         private int _eventOccurance;
         public bool IsReady;
-
-        public Action Closed;
 
         public bool ShouldShow()
         {

@@ -30,13 +30,14 @@ TextureImporter:
   nPOTScale: 1
   lightmap: 0
   compressionQuality: 50
+  alphaIsTransparency: 1
   textureType: 2
   buildTargetSettings:
-  - buildTarget: Web
+  - buildTarget: Android
     maxTextureSize: 1024
     textureFormat: -3
     compressionQuality: 50
-  - buildTarget: Standalone
+  - buildTarget: Web
     maxTextureSize: 1024
     textureFormat: -3
     compressionQuality: 50

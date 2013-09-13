@@ -207,6 +207,12 @@ public abstract class UITweener : IgnoreTimeScale
 	}
 
 	/// <summary>
+	/// Mark as not started when finished to enable delay on next play.
+	/// </summary>
+
+	void OnDisable () { mStarted = false; }
+
+	/// <summary>
 	/// Sample the tween at the specified factor.
 	/// </summary>
 
@@ -291,13 +297,19 @@ public abstract class UITweener : IgnoreTimeScale
 		mAmountPerDelta = Mathf.Abs(amountPerDelta);
 		if (!forward) mAmountPerDelta = -mAmountPerDelta;
 		enabled = true;
+		Update();
 	}
 
 	/// <summary>
 	/// Manually reset the tweener's state to the beginning.
 	/// </summary>
 
-	public void Reset() { mFactor = (mAmountPerDelta < 0f) ? 1f : 0f; Sample(mFactor, false); }
+	public void Reset ()
+	{
+		mStarted = false;
+		mFactor = (mAmountPerDelta < 0f) ? 1f : 0f;
+		Sample(mFactor, false);
+	}
 
 	/// <summary>
 	/// Manually start the tweening process, reversing its direction.

@@ -78,6 +78,7 @@ public class UISlider : IgnoreTimeScale
 	UISprite mFGFilled;
 	bool mInitDone = false;
 	Vector2 mSize = Vector2.zero;
+	Vector2 mCenter = Vector3.zero;
 
 	/// <summary>
 	/// Value of the slider.
@@ -117,10 +118,12 @@ public class UISlider : IgnoreTimeScale
 			mFGFilled = (mFGWidget != null) ? mFGWidget as UISprite : null;
 			mFGTrans = foreground.transform;
 			if (mSize == Vector2.zero) mSize = foreground.localScale;
+			if (mCenter == Vector2.zero) mCenter = foreground.localPosition + foreground.localScale * 0.5f;
 		}
 		else if (mCol != null)
 		{
 			if (mSize == Vector2.zero) mSize = mCol.size;
+			if (mCenter == Vector2.zero) mCenter = mCol.center;
 		}
 		else
 		{
@@ -159,25 +162,25 @@ public class UISlider : IgnoreTimeScale
 	/// Update the slider's position on press.
 	/// </summary>
 
-	void OnPress (bool pressed) { if (pressed && UICamera.currentTouchID != -100) UpdateDrag(); }
+	void OnPress (bool pressed) { if (enabled && pressed && UICamera.currentTouchID != -100) UpdateDrag(); }
 
 	/// <summary>
 	/// When dragged, figure out where the mouse is and calculate the updated value of the slider.
 	/// </summary>
 
-	void OnDrag (Vector2 delta) { UpdateDrag(); }
+	void OnDrag (Vector2 delta) { if (enabled) UpdateDrag(); }
 
 	/// <summary>
 	/// Callback from the thumb.
 	/// </summary>
 
-	void OnPressThumb (GameObject go, bool pressed) { if (pressed) UpdateDrag(); }
+	void OnPressThumb (GameObject go, bool pressed) { if (enabled && pressed) UpdateDrag(); }
 
 	/// <summary>
 	/// Callback from the thumb.
 	/// </summary>
 
-	void OnDragThumb (GameObject go, Vector2 delta) { UpdateDrag(); }
+	void OnDragThumb (GameObject go, Vector2 delta) { if (enabled) UpdateDrag(); }
 
 	/// <summary>
 	/// Watch for key events and adjust the value accordingly.
@@ -185,17 +188,20 @@ public class UISlider : IgnoreTimeScale
 
 	void OnKey (KeyCode key)
 	{
-		float step = (numberOfSteps > 1f) ? 1f / (numberOfSteps - 1) : 0.125f;
+		if (enabled)
+		{
+			float step = (numberOfSteps > 1f) ? 1f / (numberOfSteps - 1) : 0.125f;
 
-		if (direction == Direction.Horizontal)
-		{
-			if		(key == KeyCode.LeftArrow)	Set(rawValue - step, false);
-			else if (key == KeyCode.RightArrow) Set(rawValue + step, false);
-		}
-		else
-		{
-			if		(key == KeyCode.DownArrow)	Set(rawValue - step, false);
-			else if (key == KeyCode.UpArrow)	Set(rawValue + step, false);
+			if (direction == Direction.Horizontal)
+			{
+				if (key == KeyCode.LeftArrow) Set(rawValue - step, false);
+				else if (key == KeyCode.RightArrow) Set(rawValue + step, false);
+			}
+			else
+			{
+				if (key == KeyCode.DownArrow) Set(rawValue - step, false);
+				else if (key == KeyCode.UpArrow) Set(rawValue + step, false);
+			}
 		}
 	}
 
@@ -220,7 +226,7 @@ public class UISlider : IgnoreTimeScale
 		if (!plane.Raycast(ray, out dist)) return;
 
 		// Collider's bottom-left corner in local space
-		Vector3 localOrigin = mTrans.localPosition + mCol.center - mCol.extents;
+		Vector3 localOrigin = mTrans.localPosition + (Vector3)(mCenter - mSize * 0.5f);
 		Vector3 localOffset = mTrans.localPosition - localOrigin;
 
 		// Direction to the point on the plane in scaled local space
@@ -228,7 +234,7 @@ public class UISlider : IgnoreTimeScale
 		Vector3 dir = localCursor + localOffset;
 
 		// Update the slider
-		Set( (direction == Direction.Horizontal) ? dir.x / mCol.size.x : dir.y / mCol.size.y, false );
+		Set((direction == Direction.Horizontal) ? dir.x / mSize.x : dir.y / mSize.y, false);
 	}
 
 	/// <summary>
@@ -281,7 +287,7 @@ public class UISlider : IgnoreTimeScale
 
 					if (mFGWidget != null)
 					{
-						if (val > 0.001f)
+						if (stepValue > 0.001f)
 						{
 							mFGWidget.enabled = true;
 							mFGWidget.MarkAsChanged();

@@ -33,7 +33,6 @@ using System;
 
 public class HZInterstitialAd : MonoBehaviour {
   
-  public static void show() {show("default"); }
   public static void show(string tag="default") {
     #if UNITY_ANDROID
     HZInterstitialAdAndroid.show(tag);
@@ -54,7 +53,6 @@ public class HZInterstitialAd : MonoBehaviour {
     #endif
   }
   
-  public static void fetch(){fetch("default");}
   public static void fetch(string tag="default") {
     #if UNITY_ANDROID
     HZInterstitialAdAndroid.fetch(tag);
@@ -65,7 +63,6 @@ public class HZInterstitialAd : MonoBehaviour {
     #endif
   }
   
-  public static bool isAvailable(){return isAvailable("default");}
   public static bool isAvailable(string tag="default") {
     #if UNITY_ANDROID
   	return HZInterstitialAdAndroid.isAvailable(tag);

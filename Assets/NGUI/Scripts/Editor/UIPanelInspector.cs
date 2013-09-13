@@ -24,8 +24,9 @@ public class UIPanelInspector : Editor
 		{
 			case EventType.MouseUp:
 			{
-				UIWidget[] widgets = NGUIEditorTools.Raycast(target as UIPanel, e.mousePosition);
-				if (widgets.Length > 0) Selection.activeGameObject = widgets[0].gameObject;
+				UIPanel panel = target as UIPanel;
+				BetterList<UIWidget> widgets = UIWidgetInspector.SceneViewRaycast(panel, e.mousePosition);
+				if (widgets.size > 0) Selection.activeGameObject = widgets[0].gameObject;
 			}
 			break;
 
@@ -50,6 +51,7 @@ public class UIPanelInspector : Editor
 	{
 		UIPanel panel = target as UIPanel;
 		BetterList<UIDrawCall> drawcalls = panel.drawCalls;
+		drawcalls.Sort(delegate(UIDrawCall w1, UIDrawCall w2) { return w1.depth.CompareTo(w2.depth); });
 		EditorGUIUtility.LookLikeControls(80f);
 
 		//NGUIEditorTools.DrawSeparator();
@@ -61,13 +63,6 @@ public class UIPanelInspector : Editor
 		{
 			NGUIEditorTools.RegisterUndo("Panel Alpha", panel);
 			panel.alpha = alpha;
-		}
-
-		if (panel.showInPanelTool != EditorGUILayout.Toggle("Panel Tool", panel.showInPanelTool))
-		{
-			panel.showInPanelTool = !panel.showInPanelTool;
-			EditorUtility.SetDirty(panel);
-			EditorWindow.FocusWindowIfItsOpen<UIPanelTool>();
 		}
 
 		GUILayout.BeginHorizontal();
@@ -82,14 +77,56 @@ public class UIPanelInspector : Editor
 			EditorUtility.SetDirty(panel);
 		}
 
+		// No one seems to know how to use this properly correctly. Solution? Removing it.
+		// If you know wtf you're doing, you're welcome to uncomment it.
+
+		//GUILayout.BeginHorizontal();
+		//bool depth = EditorGUILayout.Toggle("Depth Pass", panel.depthPass, GUILayout.Width(100f));
+		//GUILayout.Label("Doubles draw calls, saves fillrate");
+		//GUILayout.EndHorizontal();
+
+		//if (panel.depthPass != depth)
+		//{
+		//    panel.depthPass = depth;
+		//    panel.UpdateDrawcalls();
+		//    EditorUtility.SetDirty(panel);
+		//}
+
+		//if (depth)
+		//{
+		//    UICamera cam = UICamera.FindCameraForLayer(panel.gameObject.layer);
+
+		//    if (cam == null || cam.camera.isOrthoGraphic)
+		//    {
+		//        EditorGUILayout.HelpBox("Please note that depth pass will only save fillrate when used with 3D UIs, and only UIs drawn by the game camera. If you are using a separate camera for the UI, you will not see any benefit!", MessageType.Warning);
+		//    }
+		//}
+
 		GUILayout.BeginHorizontal();
-		bool depth = EditorGUILayout.Toggle("Depth Pass", panel.depthPass, GUILayout.Width(100f));
-		GUILayout.Label("Extra draw call, saves fillrate");
+		bool sort = EditorGUILayout.Toggle("Depth Sort", panel.sortByDepth, GUILayout.Width(100f));
+		GUILayout.Label("Sort widgets by depth (ignore Z)");
 		GUILayout.EndHorizontal();
 
-		if (panel.depthPass != depth)
+		if (panel.sortByDepth != sort)
 		{
-			panel.depthPass = depth;
+			panel.sortByDepth = sort;
+			panel.UpdateDrawcalls();
+			EditorUtility.SetDirty(panel);
+		}
+
+		if (!sort)
+		{
+			EditorGUILayout.HelpBox("Keep the 'Depth Sort' flag turned on, unless you are working with a UI created prior to NGUI 2.7.0 and want to sort by Z in addition to Depth.", MessageType.Warning);
+		}
+
+		GUILayout.BeginHorizontal();
+		bool cull = EditorGUILayout.Toggle("Cull", panel.cullWhileDragging, GUILayout.Width(100f));
+		GUILayout.Label("Cull widgets while dragging them");
+		GUILayout.EndHorizontal();
+
+		if (panel.cullWhileDragging != cull)
+		{
+			panel.cullWhileDragging = cull;
 			panel.UpdateDrawcalls();
 			EditorUtility.SetDirty(panel);
 		}
@@ -106,8 +143,17 @@ public class UIPanelInspector : Editor
 			EditorUtility.SetDirty(panel);
 		}
 
-		EditorGUILayout.LabelField("Widgets", panel.widgets.size.ToString());
-		EditorGUILayout.LabelField("Draw Calls", drawcalls.size.ToString());
+		if (stat)
+		{
+			EditorGUILayout.HelpBox("Only mark the panel as 'static' if you know FOR CERTAIN that the widgets underneath will not move, rotate, or scale. Doing this improves performance, but moving widgets around will have no effect.", MessageType.Warning);
+		}
+
+		if (panel.showInPanelTool != EditorGUILayout.Toggle("Panel Tool", panel.showInPanelTool))
+		{
+			panel.showInPanelTool = !panel.showInPanelTool;
+			EditorUtility.SetDirty(panel);
+			EditorWindow.FocusWindowIfItsOpen<UIPanelTool>();
+		}
 
 		UIPanel.DebugInfo di = (UIPanel.DebugInfo)EditorGUILayout.EnumPopup("Debug Info", panel.debugInfo);
 
@@ -171,6 +217,13 @@ public class UIPanelInspector : Editor
 					EditorUtility.SetDirty(panel);
 				}
 			}
+
+#if !UNITY_3_5 && !UNITY_4_0 && (UNITY_ANDROID || UNITY_IPHONE || UNITY_WP8 || UNITY_BLACKBERRY)
+			if (PlayerSettings.targetGlesGraphics == TargetGlesGraphics.OpenGLES_1_x)
+			{
+				EditorGUILayout.HelpBox("Clipping requires shader support!\n\nOpen File -> Build Settings -> Player Settings -> Other Settings, then set:\n\n- Graphics Level: OpenGL ES 2.0.", MessageType.Error);
+			}
+#endif
 		}
 
 		if (clipping == UIDrawCall.Clipping.HardClip)
@@ -188,17 +241,22 @@ public class UIPanelInspector : Editor
 			}
 		}
 
-		foreach (UIDrawCall dc in drawcalls)
+		if (panel.drawCalls.size > 0 && NGUIEditorTools.DrawHeader(panel.drawCalls.size + " draw calls from " + panel.widgets.size + " widgets", "DrawCalls"))
 		{
-			NGUIEditorTools.DrawSeparator();
-			EditorGUILayout.ObjectField("Material", dc.material, typeof(Material), false);
-			EditorGUILayout.LabelField("Triangles", dc.triangles.ToString());
-
-			if (clipping != UIDrawCall.Clipping.None && !dc.isClipped)
+			NGUIEditorTools.BeginContents();
+			
+			foreach (UIDrawCall dc in drawcalls)
 			{
-				EditorGUILayout.HelpBox("You must switch this material's shader to Unlit/Transparent Colored or Unlit/Premultiplied Colored in order for clipping to work.",
-					MessageType.Warning);
+				EditorGUILayout.ObjectField("Material", dc.material, typeof(Material), false);
+				EditorGUILayout.LabelField("Triangles", dc.triangles.ToString());
+
+				if (clipping != UIDrawCall.Clipping.None && !dc.isClipped)
+				{
+					EditorGUILayout.HelpBox("You must switch this material's shader to Unlit/Transparent Colored or Unlit/Premultiplied Colored in order for clipping to work.",
+						MessageType.Warning);
+				}
 			}
+			NGUIEditorTools.EndContents();
 		}
 	}
 }

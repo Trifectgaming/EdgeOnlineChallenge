@@ -1,7 +1,7 @@
 ----------------------------------------------
             NGUI: Next-Gen UI kit
  Copyright © 2011-2012 Tasharen Entertainment
-                Version 2.5.1
+                Version 2.7.0
     http://www.tasharen.com/?page_id=197
             support@tasharen.com
 ----------------------------------------------
@@ -34,6 +34,84 @@ Using NGUI with JavaScript (UnityScript)? Read this first: http://www.tasharen.c
 -----------------
  Version History
 -----------------
+
+2.7.0:
+- NEW: Added a way to resolve all Depth/Z issues. Check your UIPanels and enable Depth Sorting.
+- FIX: DownloadTexture no longer leaves a shadow of the previous texture behind.
+- FIX: UIDragObject will no longer behave oddly with multiple touches.
+- FIX: Popup menu will now correctly trigger OnChange functions on the same selection.
+- FIX: UITexture will now default to the Unlit/Transparent Colored shader.
+- FIX: Atlas Maker will no longer default sprite list to be hidden.
+
+2.6.5:
+- FIX: Labels now have "Max Height", and "Max Lines" again works as expected.
+- FIX: Widgets no longer store a reference to texture and material.
+- FIX: Fix for some issues with the dynamic fonts.
+- FIX: Removed the "password" setting from UILabel in order to clear up some confusion.
+- FIX: Transparent colored shader no longer has fixed function pipeline code inside.
+- FIX: Atlas maker will now be more perforce-friendly.
+- FIX: Popup list will no longer show on Click when the Popup List script is disabled.
+- FIX: NGUIMath.Calculate functions will now ignore recently disabled widgets.
+- FIX: UIWidget will no longer attempt to create a panel until after Start().
+- FIX: UICamera.touchCount and UICamera.dragCount will now work correctly with multi-touch turned off.
+- FIX: WP8 and BB10 tweaks.
+
+2.6.4:
+- NEW: UIStretch now has the 'run once' option matching UIAnchor.
+- FIX: Non-sticky press was not working quite right...
+- FIX: Rewrote the transform inspector.
+- FIX: Removed the "depth pass" option from the panel's inspector since 99.9% of the people were mis-using it.
+- FIX: UIButtonKeys.startsSelected got broken at some point.
+- FIX: UIPopupList now respects atlas pixel size and again works correctly for menu style popups.
+- FIX: UIPanel will no longer keep references to materials when disabled.
+
+2.6.3:
+- NEW: Noticeably improved performance and garbage collection when using Unity 4.1+
+- NEW: It's now possible to select sprites in the Atlas Maker for preview purposes.
+- NEW: Transform inspector will now warn you when widget panel is marked as 'static'.
+- NEW: You can now toggle the panel's "widgets are static" flag from within the panel tool.
+- FIX: Widgets will no longer be constantly checking for layer changes in update.
+- FIX: Shrink-to-fit labels will now auto-grow when possible.
+- FIX: Labels can no longer be resized using handles (but can still be moved and rotated).
+- FIX: Labels will now auto-adjust their size properly when the max width gets adjusted.
+- FIX: Creating an atlas would rarely throw a null exception. This has been fixed.
+- FIX: Draggable panel + non-sticky keys will now mix properly.
+- FIX: Drag & drop should now work with non-sticky press.
+- FIX: Flash export should now work again.
+- DEL: Dropped all remaining support for Unity 3.4.
+
+2.6.2:
+- NEW: You can now automatically apply alpha pre-multiplication to textures when creating an atlas.
+- NEW: Added UIWidget.Raycast to perform a raycast without using colliders.
+- NEW: Added a texture preview to UITexture.
+- NEW: Added an option to UIAnchor to run only once, and then destroy itself. Also optimized it slightly.
+- NEW: Transform inspector will now gray out fields that are not commonly used by the UI when a widget is selected.
+- FIX: Transform multi-object editing was not quite right for widgets...
+- FIX: "Shrink to fit" option on labels now works vertically, not just horizontally.
+- FIX: Changing a sprite in inspector will no longer auto-resize it. Use MakePixelPerfect to resize it.
+
+2.6.1:
+- FIX: Dynamic font-related fixes.
+- FIX: Depth pass will now be force-disabled when the panel is clipped.
+- FIX: Sticky press option on the UICamera no longer breaks OnDrop events.
+- FIX: UIInput's useLabelTextAtStart should now work again.
+- FIX: UICamera.touchCount should now be accurate.
+- FIX: Fixed a typo in the image button inspector.
+- FIX: UIWidget.UpdateGeometry will now check for object's disabled state prior to filling the geometry.
+
+2.6.0
+- NEW: Added dynamic font support for Unity 4.0.
+- NEW: Handles can now be toggled on/off from the NGUI menu.
+- NEW: Atlas maker will now be limited by max texture size, and will no longer make it possible to corrupt an atlas.
+- NEW: Warning will be shown on the panel if clipping is not possible (GLES 1.1).
+- NEW: Checkbox can now have fade in the checkmark instantly.
+- NEW: You can now leave C++ style comments (//) in the localization files.
+- NEW: You can now paste into input fields in stand-alone builds.
+- NEW: Added disabled state to UIImageButton (Nicki)
+- FIX: UISlider will now use the sprite size rather than collider size to determine the touch effect area.
+- FIX: Resetting the tween will now mark it as not started.
+- FIX: Blank labels will no longer be localized.
+- FIX: Resetting the sprite animation will also reset the sprite back to 0.
 
 2.5.1
 - NEW: Added a "shrink to fit" option for labels that will scale down the text if it doesn't fit.

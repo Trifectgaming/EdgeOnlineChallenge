@@ -21,6 +21,8 @@ public class UIStretch : MonoBehaviour
 		Vertical,
 		Both,
 		BasedOnHeight,
+		FillKeepingRatio, // Fits the image so that it entirely fills the specified container keeping its ratio
+		FitInternalKeepingRatio // Fits the image/item inside of the specified container keeping its ratio
 	}
 
 	/// <summary>
@@ -40,17 +42,41 @@ public class UIStretch : MonoBehaviour
 	/// </summary>
 
 	public UIPanel panelContainer = null;
+
+	/// <summary>
+	/// Stretching style.
+	/// </summary>
+
 	public Style style = Style.None;
+
+	/// <summary>
+	/// Whether the operation will occur only once and the script will then be disabled.
+	/// </summary>
+
+	public bool runOnlyOnce = false;
+
+	/// <summary>
+	/// Relative-to-target size.
+	/// </summary>
+
 	public Vector2 relativeSize = Vector2.one;
+
+	/// <summary>
+	/// The size that the item/image should start out initially.
+	/// Used for FillKeepingRatio, and FitInternalKeepingRatio.
+	/// Contributed by Dylan Ryan.
+	/// </summary>
+
+	public Vector2 initialSize = Vector2.one;
 
 	Transform mTrans;
 	UIRoot mRoot;
 	Animation mAnim;
 	Rect mRect;
-	
-	void Awake () 
-	{ 
-		mAnim = animation; 
+
+	void Awake ()
+	{
+		mAnim = animation;
 		mRect = new Rect();
 		mTrans = transform;
 	}
@@ -59,6 +85,7 @@ public class UIStretch : MonoBehaviour
 	{
 		if (uiCamera == null) uiCamera = NGUITools.FindCameraForLayer(gameObject.layer);
 		mRoot = NGUITools.FindInParents<UIRoot>(gameObject);
+		Update();
 	}
 
 	void Update ()
@@ -115,8 +142,8 @@ public class UIStretch : MonoBehaviour
 				if (mRoot != null) adjustment = mRoot.pixelSizeAdjustment;
 			}
 			else return;
-			
-			float rectWidth  = mRect.width;
+
+			float rectWidth = mRect.width;
 			float rectHeight = mRect.height;
 
 			if (adjustment != 1f && rectHeight > 1f)
@@ -133,13 +160,56 @@ public class UIStretch : MonoBehaviour
 				localScale.x = relativeSize.x * rectHeight;
 				localScale.y = relativeSize.y * rectHeight;
 			}
+			else if (style == Style.FillKeepingRatio)
+			{
+				// Contributed by Dylan Ryan
+				float screenRatio = rectWidth / rectHeight;
+				float imageRatio = initialSize.x / initialSize.y;
+
+				if (imageRatio < screenRatio)
+				{
+					// Fit horizontally
+					float scale = rectWidth / initialSize.x;
+					localScale.x = rectWidth;
+					localScale.y = initialSize.y * scale;
+				}
+				else
+				{
+					// Fit vertically
+					float scale = rectHeight / initialSize.y;
+					localScale.x = initialSize.x * scale;
+					localScale.y = rectHeight;
+				}
+			}
+			else if (style == Style.FitInternalKeepingRatio)
+			{
+				// Contributed by Dylan Ryan
+				float screenRatio = rectWidth / rectHeight;
+				float imageRatio = initialSize.x / initialSize.y;
+
+				if (imageRatio > screenRatio)
+				{
+					// Fit horizontally
+					float scale = rectWidth / initialSize.x;
+					localScale.x = rectWidth;
+					localScale.y = initialSize.y * scale;
+				}
+				else
+				{
+					// Fit vertically
+					float scale = rectHeight / initialSize.y;
+					localScale.x = initialSize.x * scale;
+					localScale.y = rectHeight;
+				}
+			}
 			else
 			{
-				if (style == Style.Both || style == Style.Horizontal)	localScale.x = relativeSize.x * rectWidth;
-				if (style == Style.Both || style == Style.Vertical)		localScale.y = relativeSize.y * rectHeight;
+				if (style == Style.Both || style == Style.Horizontal) localScale.x = relativeSize.x * rectWidth;
+				if (style == Style.Both || style == Style.Vertical) localScale.y = relativeSize.y * rectHeight;
 			}
 
 			if (mTrans.localScale != localScale) mTrans.localScale = localScale;
+			if (runOnlyOnce && Application.isPlaying) Destroy(this);
 		}
 	}
 }
