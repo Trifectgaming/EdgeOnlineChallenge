@@ -54,10 +54,6 @@ public static class AdManager
             }
             else
             {
-                if (expectation != null)
-                {
-                    LogHandler.Handle("Expectation not met, ad " + adName + " will show in " + expectation.WillShowIn() + " more event occurances.");
-                }
                 if (dismissed != null)
                 {
                     dismissed();
