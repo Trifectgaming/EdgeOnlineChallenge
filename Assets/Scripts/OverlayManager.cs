@@ -1,65 +1,72 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class OverlayManager : MonoBehaviour
 {
-    public tk2dSprite[] sprites;
     public float speed;
+    public float OverlayWidth;
+    public Vector3 end;
+    public Vector3 start;
     private Transform _transform;
-    private Transform[] _overlayTransforms;
-    private float _overlayWidth;
-    private Vector3 _end;
-    private int last;
-    private int inView;
+    private List<Node<Transform>> _overlayQueue;
+    private Node<Transform> _head;
 
     void Start ()
     {
         _transform = transform;
-        sprites = gameObject.GetComponentsInChildren<tk2dSprite>();
-        _overlayWidth = sprites[0].GetBounds().size.x;
-        _overlayTransforms = new Transform[sprites.Length];
-        _end = new Vector3(UIHelper.MinX - _overlayWidth, 0, _transform.position.z);
+        var sprites = gameObject.GetComponentsInChildren<tk2dSprite>();
+        _overlayQueue = new List<Node<Transform>>(sprites.Length);        
+        OverlayWidth = sprites[0].GetBounds().size.x;
+        end = new Vector3(UIHelper.MinX - OverlayWidth, 0, _transform.position.z);
+        start = new Vector3(UIHelper.MaxX, 0, transform.position.z);
         for (int index = 0; index < sprites.Length; index++)
         {
             var sprite = sprites[index];
-            _overlayTransforms[index] = sprite.transform;
+            var currentTransform = sprite.transform;
             if (index == 0)
             {
-                _overlayTransforms[index].position = new Vector3(UIHelper.MinX, 0, _transform.position.z);
+                currentTransform.position = new Vector3(UIHelper.MinX, 0, _transform.position.z);
             }
             else
             {
-                GetBehind(_overlayTransforms[index], _overlayTransforms[index - 1]);                
+                currentTransform.position = start;
             }
-            last = index;
+            var newNode = new Node<Transform>(currentTransform);
+            if (_overlayQueue.Count > 0)
+                _overlayQueue[index - 1].Next = newNode;
+            _overlayQueue.Add(newNode);
+            if (_overlayQueue.Count == sprites.Length)
+            {
+                _overlayQueue[index].Next = _overlayQueue[0];
+            }
         }
+        _head = _overlayQueue[0];
     }
 
-    private void GetBehind(Transform who, Transform to)
-    {
-        who.position = new Vector3(to.position.x + _overlayWidth, 0, _transform.position.z);
-    }
 
     void Update ()
     {
-        var currentTranform = _overlayTransforms[inView];
-        if ((currentTranform.localPosition.x + _overlayWidth) < UIHelper.MinX)
+        var currentTranform = _head.Value;
+        if ((currentTranform.position.x + OverlayWidth - 1) <= UIHelper.MinX)
         {
-            GetBehind(currentTranform, _overlayTransforms[last]);
-            Iterate(ref last);
-            Iterate(ref inView);
+            currentTranform.position = start;
+            _head = _head.Next;
         }
-        foreach (Transform trans in _overlayTransforms)
+        if ((currentTranform.position.x + OverlayWidth) <= UIHelper.MaxX)
         {
-            trans.position = Vector3.MoveTowards(trans.position, _end, Time.deltaTime*speed);
+            _head.Next.Value.position = Vector3.MoveTowards(_head.Next.Value.position, end, Time.deltaTime * speed);            
         }
+        currentTranform.position = Vector3.MoveTowards(currentTranform.position, end, Time.deltaTime * speed);
     }
+}
 
-    private void Iterate(ref int i)
+public class Node<T>
+{
+    public T Value;
+    public Node<T> Next;
+
+    public Node(T value)
     {
-        i++;
-        if (i > (_overlayTransforms.Length - 1))
-        {
-            i = 0;
-        }
+        Value = value;
     }
 }

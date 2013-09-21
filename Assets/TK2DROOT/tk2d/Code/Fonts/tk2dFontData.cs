@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class tk2dFontChar
 {
 	/// <summary>
-	/// End points forming a quad
+	/// end points forming a quad
 	/// </summary>
     public Vector3 p0, p1;
 	/// <summary>
