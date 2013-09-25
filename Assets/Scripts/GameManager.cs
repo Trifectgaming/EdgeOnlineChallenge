@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
         return _rails;
     }
 
+    public static GameMode GameMode;
+
     public PauseMenu PauseMenu;
     public TutorialMenu TutorialMenu;
     public GameOverMenu GameOverMenu;
@@ -21,9 +23,6 @@ public class GameManager : MonoBehaviour
     public ScoreManager ScoreManager;
     public int lanes;
     public int allowedRailDamage;
-    private int _currentLevel = 0;
-    private int _currentWaveCount = 0;
-    private AudioClip BGM;
     public AudioClip EndGameAudio;
     public AudioClip WonGameAudio;
     public MeshRenderer Background;
@@ -31,18 +30,20 @@ public class GameManager : MonoBehaviour
     public GameObject WaveText;
     public static bool IsEndless;
     public bool IgnoreTutorialPref;
+    public Wave CurrentWave;
 
     public Level[] Levels;
 
+    private int _currentLevel;
+    private AudioClip BGM;
+    private int _currentWaveCount;
     private static int _lanes;
     private static Rail[] _rails;
     private tk2dTextMesh _waveText;
     private Animation _waveAnimation;
     private bool _isPaused;
     private bool _isScoring;
-    public Wave CurrentWave;
     private bool _isGameOver;
-    public static GameMode GameMode;
 
     protected virtual void Awake()
     {
@@ -58,10 +59,8 @@ public class GameManager : MonoBehaviour
 
     private void OnFirstFired(ProjectileFirstFiredMessage obj)
     {
-        Debug.Log("First fired");
         if (obj.Color == ProjectileColor.Red && (IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialOne")))
         {
-            Debug.Log("Red fired");
             Time.timeScale = 0;
             Screen.lockCursor = false;
             PlayerPrefs.SetInt("TutorialOne", 1);
@@ -69,7 +68,6 @@ public class GameManager : MonoBehaviour
         }
         else if (obj.Color == ProjectileColor.Green && (IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialTwo")))
         {
-            Debug.Log("Green fired");
             Time.timeScale = 0;
             Screen.lockCursor = false;
             PlayerPrefs.SetInt("TutorialTwo", 1);
@@ -77,7 +75,6 @@ public class GameManager : MonoBehaviour
         }
         else if (obj.Color == ProjectileColor.Blue && (IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialThree")))
         {
-            Debug.Log("Blue fired");
             Time.timeScale = 0;
             Screen.lockCursor = false;
             PlayerPrefs.SetInt("TutorialThree", 1);

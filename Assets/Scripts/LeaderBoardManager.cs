@@ -6,34 +6,26 @@ using System.Collections;
 
 public class LeaderBoardManager : MonoBehaviour
 {
-    private static readonly Dictionary<GameMode, List<PlayerScore>> Scores = new Dictionary<GameMode, List<PlayerScore>>();
-    private const int LeadersCount = 5;
     public const string Leaderkey = "LeaderBoard";
 
     public GameMode Mode;
     public bool ScoreReset;
+    public UITable NumberColumn;
+    public UITable NameColumn;
+    public UITable ScoreColumn;
+    
+    public UILabel Template;
 
     private string _leaderKey = Leaderkey;
-    private UILabel[] _nameLabels;
-    private UILabel[] _scoreLabels;
-    
+    private static readonly Dictionary<GameMode, List<PlayerScore>> Scores = new Dictionary<GameMode, List<PlayerScore>>();
+    private const int LeadersCount = 14;
+
     void Start ()
     {
         _leaderKey = Mode + _leaderKey;
         Debug.Log("LeaderBoard Started " + _leaderKey);
 	    
-        _nameLabels = gameObject
-	        .GetComponentsInChildren<UILabel>()
-	        .Where(t => t.tag == "NameLabel")
-	        .OrderBy(t => t.name)
-	        .ToArray();
-
-	    _scoreLabels = gameObject
-	        .GetComponentsInChildren<UILabel>()
-	        .Where(t => t.tag == "ScoreLabel")
-	        .OrderBy(t => t.name)
-	        .ToArray();
-
+        
         if (ScoreReset)
         {
             PlayerPrefs.DeleteKey(_leaderKey);
@@ -56,12 +48,27 @@ public class LeaderBoardManager : MonoBehaviour
                                               })
                                   .OrderByDescending(p => p.Score)
                                   .ToList();
+        var i = 0;
+        for (; i < Scores[Mode].Count; i++)
+        {
+            var nameLabel = (UILabel) Instantiate(Template);
+            nameLabel.text = Scores[Mode][i].Name.PadRight(16,'*');
+            nameLabel.name = "Name" + i;
+            nameLabel.transform.parent = NameColumn.transform;
 
-        for (int i = 0; i < Scores[Mode].Count; i++)
-	    {
-            _nameLabels[i].text = Scores[Mode][i].Name;
-            _scoreLabels[i].text = Scores[Mode][i].Score.ToString(CultureInfo.InvariantCulture);
-	    }
+            var numberLabel = (UILabel) Instantiate(Template);
+            numberLabel.text = (i + 1).ToString(CultureInfo.InvariantCulture);
+            numberLabel.name = "Number" + i;
+            numberLabel.transform.parent = NumberColumn.transform;
+            
+            var scoreLabel = (UILabel)Instantiate(Template);
+            scoreLabel.text = Scores[Mode][i].Score.ToString(CultureInfo.InvariantCulture);
+            scoreLabel.name = "Score" + i;
+            scoreLabel.transform.parent = ScoreColumn.transform;
+        }
+        NameColumn.Reposition();
+        NumberColumn.Reposition();
+        ScoreColumn.Reposition();
 	}
 
     // Update is called once per frame
@@ -71,9 +78,15 @@ public class LeaderBoardManager : MonoBehaviour
 
     public static bool CheckHighScore(long score, out int position)
     {
+        Debug.Log("Checking score of " + score);
         position = -1;
         List<PlayerScore> scores;
-        if (!Scores.TryGetValue(GameManager.GameMode, out scores)) return false;
+        if (!Scores.TryGetValue(GameManager.GameMode, out scores))
+        {
+            Debug.Log("Did not find GameMode " + GameManager.GameMode);            
+            return false;
+        }
+        Debug.Log("Found " + scores.Count + " for GameMode " + GameManager.GameMode);
         for (int index = 0; index < scores.Count; index++)
         {
             var playerScore = scores[index];
@@ -81,6 +94,10 @@ public class LeaderBoardManager : MonoBehaviour
             {
                 position = index;
                 break;
+            }
+            else
+            {
+                Debug.Log("Score " + score +" < " + playerScore);    
             }
         }
         return position > -1;
@@ -91,6 +108,7 @@ public class LeaderBoardManager : MonoBehaviour
         int position;
         if (CheckHighScore(score, out position))
         {
+            Debug.Log("Setting score of " + score + " in position " + position);
             Scores[GameManager.GameMode].Insert(position, new PlayerScore(playerName, score));
             Scores[GameManager.GameMode] = Scores[GameManager.GameMode].Take(LeadersCount).ToList();
             SaveScores();
