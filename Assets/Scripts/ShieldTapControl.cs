@@ -37,8 +37,6 @@ public class ShieldTapControl : ShieldControlBase
     private GameObject _spinLeftGo;
     private GameObject _spinRightGo;
 
-    // Use this for initialization
-
     public bool HitTest(Vector3 position, params GameObject[] objects)
     {
         if (objects == null || objects.Length == 0)
@@ -48,17 +46,9 @@ public class ShieldTapControl : ShieldControlBase
                           };
         RaycastHit hitInfo;
         var rayPosition = Camera.main.ScreenPointToRay(position);
-        Debug.Log("Hit Position: " + rayPosition);
-        for (int index = 0; index < objects.Length; index++)
-        {
-            var o = objects[index];
-            if (o != null) Debug.Log("Object " + index + " Position: " + o.transform.position);
-        }
         if (Physics.Raycast(rayPosition, out hitInfo, 100))
         {
-            Debug.Log("Touch Hit: " + hitInfo.transform.gameObject);
             return objects.Contains(hitInfo.transform.gameObject);
-            //SpinRight.HitTest(position) || SpinLeft.HitTest(position)
         }
         return false;
     }

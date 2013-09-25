@@ -9,7 +9,8 @@ public class DamageEffectManager : GameSceneObject
     public Vector3 ImpactForce;
     public MouseSensitivity SlowEffect;
     public Drone Drone;
-    public MouseController Controller;
+    public MouseController MouseController;
+    public TapController TapController;
     public MouseSensitivity previousSensitivity;
     public bool Initialized;
     public MouseSensitivity DisableEffect;
@@ -73,11 +74,12 @@ public class DamageEffectManager : GameSceneObject
             {
                 var parent = transform.parent;
                 Drone = parent.GetComponent<Drone>();
-                Controller = parent.GetComponent<MouseController>();
+                MouseController = parent.GetComponent<MouseController>();
+                TapController = parent.GetComponent<TapController>();
             }
-            if (Drone != null && Controller != null)
+            if (Drone != null && MouseController != null)
             {
-                previousSensitivity = Controller.Sensitivity;
+                previousSensitivity = MouseController.Sensitivity;
                 Initialized = true;
             }
         }
@@ -91,10 +93,11 @@ public class DamageEffectManager : GameSceneObject
 
     private void RemoveEffect()
     {
-        if (Controller)
+        if (MouseController)
         {
             CurrentEffect = DamageEffect.None;
-            Controller.Sensitivity = previousSensitivity;
+            MouseController.enabled = true;
+            MouseController.Sensitivity = previousSensitivity;
             effectMaterial.material.SetColor("_TintColor", _originalColor);
         }
     }
@@ -106,7 +109,14 @@ public class DamageEffectManager : GameSceneObject
             case DamageEffect.None:
                 return;
             case DamageEffect.Disable:
-                if (Controller != null) Controller.Sensitivity = DisableEffect;
+                if (MouseController != null)
+                {
+                    MouseController.enabled = false;
+                }
+                if (TapController != null)
+                {
+                    TapController.enabled = false;
+                }
                 effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Repulse:
@@ -119,7 +129,7 @@ public class DamageEffectManager : GameSceneObject
                 effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Slow:
-                if (Controller != null) Controller.Sensitivity = SlowEffect;
+                if (MouseController != null) MouseController.Sensitivity = SlowEffect;
                 effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
         }

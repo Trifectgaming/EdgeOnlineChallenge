@@ -35,7 +35,6 @@ public class PauseMenu : MonoBehaviour
 
     public void Show()
     {
-        Debug.Log("PauseMenu.Show");
         gameObject.SetActive(true);
     }
 }

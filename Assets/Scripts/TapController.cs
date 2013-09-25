@@ -26,19 +26,10 @@ public class TapController : ControllerBase
                 offset = new Vector2(transform.position.x - pos.x, transform.position.y - pos.y);
             }
             var newPosition = pos + offset;
-            //if (newPosition != position)
-            //{
-            //    positionChange = Time.time;
-            //    journeyLength = Vector2.Distance(transform.position, newPosition);
-            //}
             position = newPosition;
-
-            //var distCovered = (Time.time - positionChange) * speed;
-	        //var fracJourney = distCovered/journeyLength;
             myTransform.position = position;
 
             var y = position.y;
-	        //float moveDownY = y;
 	        if (y != 0.0f)
 	        {
 	            if (myTransform.position.y > maxY)
@@ -52,7 +43,6 @@ public class TapController : ControllerBase
 	        }
 
 	        var x = position.x;
-	        //float moveDownX = x;
 	        if (x != 0.0f)
 	        {
 	            if (myTransform.position.x > maxX)

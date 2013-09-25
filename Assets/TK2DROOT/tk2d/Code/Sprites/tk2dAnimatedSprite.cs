@@ -57,9 +57,14 @@ public class tk2dAnimatedSprite : tk2dSprite
 	tk2dSpriteAnimationClip currentClip = null;
 	
 	/// <summary>
-	/// Time into the current clip. This is in clip local time (i.e. (int)clipTime = currentFrame)
+	/// Time into the current clip. This is in clip local time (i.e. (int)clipTime == currentFrame)
 	/// </summary>
     float clipTime = 0.0f;
+
+    /// <summary>
+    /// Frame on which to end the clip.
+    /// </summary>
+    private int? _endFrame;
 
 	/// <summary>
 	/// This is the frame rate of the current clip. Can be changed dynamicaly, as clipTime is accumulated time in real time.
@@ -289,10 +294,10 @@ public class tk2dAnimatedSprite : tk2dSprite
 	/// </summary>
 	/// <param name='id'>Use <see cref="GetClipIdByName"/> to resolve a named clip id</param>	
 	/// <param name='frame'> Frame to start from. </param>
-	public void PlayFromFrame(int id, int frame)
+	public void PlayFromFrame(int id, int frame, int? endFrame = null)
 	{
 		var clip = anim.clips[id];
-		Play(id, (frame + 0.001f) / clip.fps); // offset ever so slightly to round down correctly
+		Play(id, (frame + 0.001f) / clip.fps, endFrame); // offset ever so slightly to round down correctly
 	}
 	
 	// Warps the current active frame to the local time (i.e. float frame number) specified. 
@@ -318,10 +323,10 @@ public class tk2dAnimatedSprite : tk2dSprite
 	/// </summary>
 	/// <param name='id'>Use <see cref="GetClipIdByName"/> to resolve a named clip id</param>	
 	/// <param name='clipStartTime'> Clip start time in seconds. </param>
-	public void Play(int clipId, float clipStartTime)
+	public void Play(int clipId, float clipStartTime, int? endFrame = null)
 	{
 		this.clipId = clipId;
-		Play(anim.clips[clipId], clipStartTime, DefaultFps);
+		Play(anim.clips[clipId], clipStartTime, DefaultFps, endFrame);
 	}
 
 	public static float DefaultFps { get { return 0; } }
@@ -345,14 +350,19 @@ public class tk2dAnimatedSprite : tk2dSprite
 	/// <param name='clip'>The clip to play. </param>	
 	/// <param name='clipStartTime'> Clip start time in seconds. A value of DefaultFps will start the clip from the beginning </param>
 	/// <param name='overrideFps'> Overriden framerate of clip. Set to 0 to use default </param>
-	public void Play(tk2dSpriteAnimationClip clip, float clipStartTime, float overrideFps)
+	public void Play(tk2dSpriteAnimationClip clip, float clipStartTime, float overrideFps, int? endFrame = null)
 	{
 		if (clip != null)
 		{
 			state |= State.Playing;
 			currentClip = clip;
 			clipFps = (overrideFps > 0.0f)?overrideFps:currentClip.fps;
-
+		    _endFrame = endFrame;
+            if (_endFrame.HasValue)
+            {
+                if (_endFrame > (currentClip.frames.Length - 1))
+                    _endFrame = currentClip.frames.Length - 1;
+            }
 			// Simply swap, no animation is played
 			if (currentClip.wrapMode == tk2dSpriteAnimationClip.WrapMode.Single || currentClip.frames == null)
 			{
@@ -361,7 +371,7 @@ public class tk2dAnimatedSprite : tk2dSprite
 			}
 			else if (currentClip.wrapMode == tk2dSpriteAnimationClip.WrapMode.RandomFrame || currentClip.wrapMode == tk2dSpriteAnimationClip.WrapMode.RandomLoop)
 			{
-				int rnd = Random.Range(0, currentClip.frames.Length);
+				int rnd = Random.Range(0, (endFrame ?? currentClip.frames.Length));
 				WarpClipToLocalTime(currentClip, rnd);
 
 				if (currentClip.wrapMode == tk2dSpriteAnimationClip.WrapMode.RandomFrame)
@@ -375,10 +385,10 @@ public class tk2dAnimatedSprite : tk2dSprite
 				// clipStartTime is in seconds
 				// clipTime is in clip local time (ignoring fps)
 				float time = clipStartTime * clipFps;
-				if (currentClip.wrapMode == tk2dSpriteAnimationClip.WrapMode.Once && time >= clipFps * currentClip.frames.Length)
+				if (currentClip.wrapMode == tk2dSpriteAnimationClip.WrapMode.Once && time >= clipFps *  (endFrame ?? currentClip.frames.Length))
 				{
 					// warp to last frame
-					WarpClipToLocalTime(currentClip, currentClip.frames.Length - 1);
+					WarpClipToLocalTime(currentClip, (endFrame ?? currentClip.frames.Length - 1));
 					state &= ~State.Playing;
 				}
 				else
@@ -561,11 +571,11 @@ public class tk2dAnimatedSprite : tk2dSprite
 			case tk2dSpriteAnimationClip.WrapMode.Once:
 			{
 				int currFrame = (int)clipTime;
-				if (currFrame >= currentClip.frames.Length)
+				if (currFrame >= (_endFrame ?? currentClip.frames.Length))
 				{
-					SetFrameInternal(currentClip.frames.Length - 1); // set to last frame
+                    SetFrameInternal(_endFrame ?? (currentClip.frames.Length - 1)); // set to last frame
 					state &= ~State.Playing; // stop playing before calling event - the event could start a new animation playing here
-					ProcessEvents(_previousFrame, currentClip.frames.Length - 1, 1);
+                    ProcessEvents(_previousFrame, _endFrame ?? (currentClip.frames.Length - 1), 1);
 					OnCompleteAnimation();
 				}
 				else

@@ -158,7 +158,7 @@ public class EnemyManager : GameSceneObject
         projectileToFire.CurrentRail = _currentRail;
         if (!fired.Contains(color))
         {
-            Debug.Log("Sending First Fired");
+            Debug.Log("Sending First Fired " + color);
             delayMessage = new ProjectileFirstFiredMessage(color);
             Invoke("SendDelayedMessage", 1);
             fired.Add(color);

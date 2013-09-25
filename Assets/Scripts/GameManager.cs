@@ -358,7 +358,6 @@ public class GameManager : MonoBehaviour
 
     private void OnApplicationPause(bool paused)
     {
-        print("Game paused.");
         Pause();
     }
 

@@ -36,6 +36,7 @@ public class ShieldManager : GameSceneObject
         for (int i = 0; i < shields.Length; i++)
         {
             var shield = GetNextShield();
+            shield.Reset();
             SetCurrent(shield);
             yield return new WaitForSeconds(shieldCycleDelay);
         }
