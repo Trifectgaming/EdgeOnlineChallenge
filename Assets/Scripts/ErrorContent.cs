@@ -8,7 +8,7 @@ public class ErrorContent : MonoBehaviour
 
     public void SetContent(ExceptionMessage message)
     {
-        Message.text = message.Message;
+        Message.text = message.Message + " (" + message.Count + ")" ;
         Date.text = message.Occurance.ToString();
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -5,28 +6,17 @@ public class DamageEffectManager : GameSceneObject
 {
     public DamageEffect CurrentEffect;
     public float EffectExpirationTime;
-    public Vector3 ProjectileImpact;
-    public Vector3 ImpactForce;
-    public MouseSensitivity SlowEffect;
-    public Drone Drone;
     public MouseController MouseController;
     public TapController TapController;
-    public MouseSensitivity previousSensitivity;
     public bool Initialized;
-    public MouseSensitivity DisableEffect;
-    public MouseSensitivity Repulseffect;
-    public float repulseDistance;
     public MeshRenderer effectMaterial;
     public Color effectRed;
     public Color effectBlue;
     public Color effectGreen;
 
-    public float repulseSpeed;
-    private Vector3 impactDronePosition;
-    private Vector3 targetDronePosition;
-    private float _effectTime;
     private Color _originalColor;
     private Color _effectColor;
+    private bool _started;
 
     protected override void Awake()
     {
@@ -36,101 +26,103 @@ public class DamageEffectManager : GameSceneObject
 
     protected override void Start()
     {
-        base.Start();
-        CurrentEffect = DamageEffect.None;
-        _originalColor = effectMaterial.material.GetColor("_TintColor");
+        try
+        {
+            if (_started) return;
+            base.Start();
+            var parent = transform.parent;
+            MouseController = parent.GetComponent<MouseController>();
+            TapController = parent.GetComponent<TapController>();
+            CurrentEffect = DamageEffect.None;
+            _originalColor = effectMaterial.material.GetColor("_TintColor");
+            _started = true;
+        }
+        catch (Exception e)
+        {
+            LogHandler.Handle(e);
+        }
     }
 
     private void OnShieldImpact(ShieldImpactMessage obj)
     {
-        if (!obj.WasDeflected)
+        try
         {
-            impactDronePosition = Drone.transform.position;
-            targetDronePosition = new Vector3(impactDronePosition.x - repulseDistance, impactDronePosition.y, impactDronePosition.z);
-            CurrentEffect = obj.Projectile.DamageEffect;
-            EffectExpirationTime = Time.time + obj.Projectile.EffectTime;
-            _effectTime = Time.time;
-            ProjectileImpact = obj.Projectile.transform.position;
-            switch (obj.Projectile.ProjectileColor)
+            if (!obj.WasDeflected)
             {
-                case ProjectileColor.Blue:
-                    _effectColor = effectBlue;
-                    break;
-                case ProjectileColor.Green:
-                    _effectColor = effectGreen;
-                    break;
-                case ProjectileColor.Red:
-                    _effectColor = effectRed;
-                    break;
+                CurrentEffect = obj.Projectile.DamageEffect;
+                EffectExpirationTime = Time.time + obj.Projectile.EffectTime;
+                switch (obj.Projectile.ProjectileColor)
+                {
+                    case ProjectileColor.Blue:
+                        _effectColor = effectBlue;
+                        break;
+                    case ProjectileColor.Green:
+                        _effectColor = effectGreen;
+                        break;
+                    case ProjectileColor.Red:
+                        _effectColor = effectRed;
+                        break;
+                }
             }
+        }
+        catch (Exception e)
+        {
+            LogHandler.Handle(e);
         }
     }
 
-    void Update()
+    private void Update()
     {
-        if (!Initialized)
-        {
-            if (Drone == null)
-            {
-                var parent = transform.parent;
-                Drone = parent.GetComponent<Drone>();
-                MouseController = parent.GetComponent<MouseController>();
-                TapController = parent.GetComponent<TapController>();
-            }
-            if (Drone != null && MouseController != null)
-            {
-                previousSensitivity = MouseController.Sensitivity;
-                Initialized = true;
-            }
-        }
-        if (Initialized)
+        try
         {
             ApplyEffect();
             if (Time.time > EffectExpirationTime)
+            {
                 RemoveEffect();
+            }
+        }
+        catch (Exception e)
+        {
+            LogHandler.Handle(e);
         }
     }
 
     private void RemoveEffect()
     {
+        Start();
         if (MouseController)
         {
             CurrentEffect = DamageEffect.None;
             MouseController.enabled = true;
-            MouseController.Sensitivity = previousSensitivity;
             effectMaterial.material.SetColor("_TintColor", _originalColor);
+        }
+        if (TapController)
+        {
+            TapController.enabled = true;
         }
     }
 
     void ApplyEffect()
     {
+        Start();
         switch (CurrentEffect)
         {
             case DamageEffect.None:
                 return;
             case DamageEffect.Disable:
-                if (MouseController != null)
+                if (MouseController)
                 {
                     MouseController.enabled = false;
                 }
-                if (TapController != null)
+                if (TapController)
                 {
                     TapController.enabled = false;
                 }
                 effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Repulse:
-                var distanceCovered = (Time.deltaTime - _effectTime)*repulseSpeed;
-                var journey = distanceCovered/repulseDistance;
-                Drone.transform.position = Vector3.Lerp(
-                    impactDronePosition,
-                    targetDronePosition,
-                   journey);
-                effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Slow:
-                if (MouseController != null) MouseController.Sensitivity = SlowEffect;
-                effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
         }
     }

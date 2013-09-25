@@ -150,7 +150,18 @@ public class LogHandler
 
     private static void AddException(string exception)
     {
-        Exceptions.Add(new ExceptionMessage(exception));
+        var ex = new ExceptionMessage(exception);
+        if (!Exceptions.Contains(ex))
+        {
+            Exceptions.Add(ex);
+        }
+        else
+        {
+            var oldEx = Exceptions.IndexOf(ex);
+            ex.Count += Exceptions[oldEx].Count;
+            Exceptions.RemoveAt(oldEx);
+            Exceptions.Add(ex);
+        }
     }
 
     public static void Handle(string exception)
@@ -161,13 +172,31 @@ public class LogHandler
 
 public struct ExceptionMessage
 {
+    public bool Equals(ExceptionMessage other)
+    {
+        return string.Equals(Message, other.Message);
+    }
+
+    public override int GetHashCode()
+    {
+        return (Message != null ? Message.GetHashCode() : 0);
+    }
+
     public string Message;
     public DateTime Occurance;
+    public int Count;
 
     public ExceptionMessage(string exception)
     {
         Message = exception;
         Occurance = DateTime.UtcNow;
+        Count = 1;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        return obj is ExceptionMessage && Equals((ExceptionMessage) obj);
     }
 }
 
