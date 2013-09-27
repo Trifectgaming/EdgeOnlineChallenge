@@ -28,17 +28,15 @@ public class Touchpad : Control
     public bool normalize = false; 							    // Normalize output after the dead-zone?
     public int tapCount;	                                    // Current tap count
 
-    private int lastFingerId = -1;								// Finger last used for this joystick
-    private float tapTimeWindow; 				                // How much time there is left for a tap to occur
-    private Vector2 fingerDownPos;
-    private float fingerDownTime;
-    private float firstDeltaTime = 0.5f;
-
-    private GUITexture gui;           							// Joystick graphic
-    private Rect defaultRect;   					            // Default position / extents of the joystick graphic
-    private Boundary guiBoundary = new Boundary();			    // Boundary for joystick graphic
-    private Vector2 guiTouchOffset;				                // Offset to apply to touch input
-    private Vector2 guiCenter;  					            // Center of joystick
+    private int _lastFingerId = -1;								// Finger last used for this joystick
+    private float _tapTimeWindow; 				                // How much time there is left for a tap to occur
+    private Vector2 _fingerDownPos;
+    
+    private GUITexture _gui;           							// Joystick graphic
+    private Rect _defaultRect;   					            // Default position / extents of the joystick graphic
+    private readonly Boundary _guiBoundary = new Boundary();			    // Boundary for joystick graphic
+    private Vector2 _guiTouchOffset;				                // Offset to apply to touch input
+    private Vector2 _guiCenter;  					            // Center of joystick
 
     void Awake()
     {
@@ -49,30 +47,30 @@ public class Touchpad : Control
 	void Start ()
 	{
         enumeratedJoysticks = false;
-        gui = GetComponent<GUITexture>();
-	    defaultRect = gui.pixelInset;
+        _gui = GetComponent<GUITexture>();
+	    _defaultRect = _gui.pixelInset;
 
-	    defaultRect.x += transform.position.x*Screen.width;
-	    defaultRect.y += transform.position.y*Screen.height;
+	    _defaultRect.x += transform.position.x*Screen.width;
+	    _defaultRect.y += transform.position.y*Screen.height;
 
 	    transform.position = new Vector3(0,0,0);
 
         if (touchPad)
         {
-            if (gui.texture)
+            if (_gui.texture)
             {
-                touchZone = defaultRect;
+                touchZone = _defaultRect;
             }
         }
         else
         {
-            guiTouchOffset = new Vector2(defaultRect.width * 0.5f, defaultRect.height * 0.5f);
-            guiCenter = new Vector2(defaultRect.x + guiTouchOffset.x, defaultRect.y + guiTouchOffset.y);
+            _guiTouchOffset = new Vector2(_defaultRect.width * 0.5f, _defaultRect.height * 0.5f);
+            _guiCenter = new Vector2(_defaultRect.x + _guiTouchOffset.x, _defaultRect.y + _guiTouchOffset.y);
 
-            guiBoundary.min.x = defaultRect.x - guiTouchOffset.x;
-            guiBoundary.max.x = defaultRect.x + guiTouchOffset.x;
-            guiBoundary.min.y = defaultRect.y - guiTouchOffset.y;
-            guiBoundary.max.y = defaultRect.y + guiTouchOffset.y;
+            _guiBoundary.min.x = _defaultRect.x - _guiTouchOffset.x;
+            _guiBoundary.max.x = _defaultRect.x + _guiTouchOffset.x;
+            _guiBoundary.min.y = _defaultRect.y - _guiTouchOffset.y;
+            _guiBoundary.max.y = _defaultRect.y + _guiTouchOffset.y;
         }
 	}
 
@@ -91,18 +89,18 @@ public class Touchpad : Control
     void ResetJoystick()
     {
         // Release the finger control and set the joystick back to the default position
-        gui.pixelInset = defaultRect;
-        lastFingerId = -1;
+        _gui.pixelInset = _defaultRect;
+        _lastFingerId = -1;
         position = Vector2.zero;
-        fingerDownPos = Vector2.zero;
+        _fingerDownPos = Vector2.zero;
 
         if (touchPad)
-            gui.color = new Color(gui.color.r, gui.color.g, gui.color.b, .025f);
+            _gui.color = new Color(_gui.color.r, _gui.color.g, _gui.color.b, .025f);
     }
 
     private bool IsFingerDown()
     {
-        return (lastFingerId != -1);
+        return (_lastFingerId != -1);
     }
 
     public void LatchedFinger(int fingerId)
@@ -114,7 +112,7 @@ public class Touchpad : Control
 
     public bool IsLatched(int fingerId)
     {
-        return lastFingerId == fingerId;
+        return _lastFingerId == fingerId;
     }
 
     private void Update()
@@ -129,8 +127,8 @@ public class Touchpad : Control
         var count = Input.touchCount;
 
         // Adjust the tap time window while it still available
-        if (tapTimeWindow > 0)
-            tapTimeWindow -= Time.deltaTime;
+        if (_tapTimeWindow > 0)
+            _tapTimeWindow -= Time.deltaTime;
         else
             tapCount = 0;
 
@@ -141,7 +139,7 @@ public class Touchpad : Control
             for (int i = 0; i < count; i++)
             {
                 var touch = Input.GetTouch(i);
-                var guiTouchPos = touch.position - guiTouchOffset;
+                var guiTouchPos = touch.position - _guiTouchOffset;
 
                 var shouldLatchFinger = false;
                 if (touchPad)
@@ -155,27 +153,26 @@ public class Touchpad : Control
                 }
 
                 // Latch the finger if this is a new touch
-                if (shouldLatchFinger && (lastFingerId == -1 || lastFingerId != touch.fingerId))
+                if (shouldLatchFinger && (_lastFingerId == -1 || _lastFingerId != touch.fingerId))
                 {
 
                     if (touchPad)
                     {
-                        gui.color = new Color(gui.color.r, gui.color.g, gui.color.b, 0.15f);
+                        _gui.color = new Color(_gui.color.r, _gui.color.g, _gui.color.b, 0.15f);
 
-                        lastFingerId = touch.fingerId;
-                        fingerDownPos = touch.position;
-                        fingerDownTime = Time.time;
+                        _lastFingerId = touch.fingerId;
+                        _fingerDownPos = touch.position;
                     }
 
-                    lastFingerId = touch.fingerId;
+                    _lastFingerId = touch.fingerId;
 
                     // Accumulate taps if it is within the time window
-                    if (tapTimeWindow > 0)
+                    if (_tapTimeWindow > 0)
                         tapCount++;
                     else
                     {
                         tapCount = 1;
-                        tapTimeWindow = tapTimeDelta;
+                        _tapTimeWindow = tapTimeDelta;
                     }
 
                     // Tell other Touchpads we've latched this finger
@@ -186,7 +183,7 @@ public class Touchpad : Control
                     }
                 }
 
-                if (lastFingerId == touch.fingerId)
+                if (_lastFingerId == touch.fingerId)
                 {
                     // Override the tap count with what the iPhone SDK reports if it is greater
                     // This is a workaround, since the iPhone SDK does not currently track taps
@@ -197,17 +194,17 @@ public class Touchpad : Control
                     if (touchPad)
                     {
                         // For a touchpad, let's just set the position directly based on distance from initial touchdown
-                        position.x = Mathf.Clamp((touch.position.x - fingerDownPos.x)/(touchZone.width/2), -1, 1);
-                        position.y = Mathf.Clamp((touch.position.y - fingerDownPos.y)/(touchZone.height/2), -1, 1);
+                        position.x = Mathf.Clamp((touch.position.x - _fingerDownPos.x)/(touchZone.width/2), -1, 1);
+                        position.y = Mathf.Clamp((touch.position.y - _fingerDownPos.y)/(touchZone.height/2), -1, 1);
                     }
                     else
                     {
                         // Change the location of the joystick graphic to match where the touch is
-                        gui.pixelInset = new Rect(
-                            Mathf.Clamp(guiTouchPos.x, guiBoundary.min.x, guiBoundary.max.x),
-                            Mathf.Clamp(guiTouchPos.y, guiBoundary.min.y, guiBoundary.max.y),
-                            gui.pixelInset.width,
-                            gui.pixelInset.height);
+                        _gui.pixelInset = new Rect(
+                            Mathf.Clamp(guiTouchPos.x, _guiBoundary.min.x, _guiBoundary.max.x),
+                            Mathf.Clamp(guiTouchPos.y, _guiBoundary.min.y, _guiBoundary.max.y),
+                            _gui.pixelInset.width,
+                            _gui.pixelInset.height);
                     }
 
                     if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
@@ -219,8 +216,8 @@ public class Touchpad : Control
         if (!touchPad)
         {
             // Get a value between -1 and 1 based on the joystick graphic location
-            position.x = (gui.pixelInset.x + guiTouchOffset.x - guiCenter.x)/guiTouchOffset.x;
-            position.y = (gui.pixelInset.y + guiTouchOffset.y - guiCenter.y)/guiTouchOffset.y;
+            position.x = (_gui.pixelInset.x + _guiTouchOffset.x - _guiCenter.x)/_guiTouchOffset.x;
+            position.y = (_gui.pixelInset.y + _guiTouchOffset.y - _guiCenter.y)/_guiTouchOffset.y;
         }
 
         // Adjust for dead zone	
@@ -252,6 +249,6 @@ public class Touchpad : Control
 
     public bool HitTest(Vector2 p)
     {
-        return gui.HitTest(p);
+        return _gui.HitTest(p);
     }
 }

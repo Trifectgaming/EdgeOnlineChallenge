@@ -358,6 +358,7 @@ public class GameManager : MonoBehaviour
 
     private void OnApplicationPause(bool paused)
     {
+        if (GameOverMenu.gameObject.activeInHierarchy || ScoreMenu.gameObject.activeInHierarchy) return;
         Pause();
     }
 

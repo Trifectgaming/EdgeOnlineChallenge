@@ -158,8 +158,11 @@ public class LogHandler
         else
         {
             var oldEx = Exceptions.IndexOf(ex);
-            ex.Count += Exceptions[oldEx].Count;
-            Exceptions.RemoveAt(oldEx);
+            if (oldEx >= 0)
+            {
+                ex.Count += Exceptions[oldEx].Count;
+                Exceptions.RemoveAt(oldEx);
+            }
             Exceptions.Add(ex);
         }
     }

@@ -1,6 +1,6 @@
+using System;
 using System.Collections;
 using UnityEngine;
-using System.Xml.Serialization;
 
 public class ScoreManager : GameSceneObject
 {
@@ -8,7 +8,7 @@ public class ScoreManager : GameSceneObject
     public int BlockedAdj;
     public int MissAdj;
     public int MotherHitAdj;
-    public long totalScore;
+    public int totalScore;
     public int blocked;
     public int misses;
     public int motherHits;
@@ -132,8 +132,12 @@ public class ScoreManager : GameSceneObject
                        MotherHitsPts = motherHitPts,
                        LevelTotal = total,
                        TotalScore = totalToReport,
-                       position = position,
+                       Position = position,
                    };
+        if (gameOver && GameManager.IsEndless)
+        {
+            OnlineLeaderBoardManager.Submit(result.TotalScore, OnlineLeaderBoardManager.EndlessBoard);
+        }
         if (!GameManager.IsEndless || gameOver)
         {
             blocked = 0;
@@ -153,6 +157,6 @@ public struct ScoreInfo
     public int MotherHits;
     public int MotherHitsPts;
     public int LevelTotal;
-    public int position;
-    public long TotalScore;
+    public int Position;
+    public int TotalScore;
 }

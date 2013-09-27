@@ -9,9 +9,9 @@ public static class UIHelper
 
     static UIHelper()
     {
-        MaxY = Camera.mainCamera.orthographicSize;
+        MaxY = Camera.main.orthographicSize;
         MinY = -MaxY;
-        MaxX = (Camera.mainCamera.GetScreenWidth()/Camera.mainCamera.GetScreenHeight()*MaxY);
+        MaxX = (Camera.main.GetScreenWidth()/Camera.main.GetScreenHeight()*MaxY);
         MinX = -MaxX;
     }
 }

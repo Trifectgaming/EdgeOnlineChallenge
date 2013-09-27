@@ -16,17 +16,7 @@ public class UIButtonHandler : MonoBehaviour
         if (handler != null) handler(this, e);
     }
 
-    // Use this for initialization
-	void Start ()
-	{
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
-    protected virtual void OnClick()
+    protected void OnClick()
     {
         RaiseClick(new ClickEventArgs(this, EventArgs.Empty));
     }

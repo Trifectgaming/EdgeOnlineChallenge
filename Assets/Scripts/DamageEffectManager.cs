@@ -45,45 +45,31 @@ public class DamageEffectManager : GameSceneObject
 
     private void OnShieldImpact(ShieldImpactMessage obj)
     {
-        try
+        if (!obj.WasDeflected)
         {
-            if (!obj.WasDeflected)
+            CurrentEffect = obj.Projectile.DamageEffect;
+            EffectExpirationTime = Time.time + obj.Projectile.EffectTime;
+            switch (obj.Projectile.ProjectileColor)
             {
-                CurrentEffect = obj.Projectile.DamageEffect;
-                EffectExpirationTime = Time.time + obj.Projectile.EffectTime;
-                switch (obj.Projectile.ProjectileColor)
-                {
-                    case ProjectileColor.Blue:
-                        _effectColor = effectBlue;
-                        break;
-                    case ProjectileColor.Green:
-                        _effectColor = effectGreen;
-                        break;
-                    case ProjectileColor.Red:
-                        _effectColor = effectRed;
-                        break;
-                }
+                case ProjectileColor.Blue:
+                    _effectColor = effectBlue;
+                    break;
+                case ProjectileColor.Green:
+                    _effectColor = effectGreen;
+                    break;
+                case ProjectileColor.Red:
+                    _effectColor = effectRed;
+                    break;
             }
-        }
-        catch (Exception e)
-        {
-            LogHandler.Handle(e);
         }
     }
 
     private void Update()
     {
-        try
+        ApplyEffect();
+        if (Time.time > EffectExpirationTime)
         {
-            ApplyEffect();
-            if (Time.time > EffectExpirationTime)
-            {
-                RemoveEffect();
-            }
-        }
-        catch (Exception e)
-        {
-            LogHandler.Handle(e);
+            RemoveEffect();
         }
     }
 

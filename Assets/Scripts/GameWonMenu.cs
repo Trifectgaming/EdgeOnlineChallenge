@@ -17,11 +17,11 @@ public abstract class EndGameMenuBase : ScoreMenuBase
         AdditionalActions.Add(si =>
                                   {
                                       string message = string.Empty;
-                                      if (si.position == 0)
+                                      if (si.Position == 0)
                                       {
                                           message = string.Format("New High Score with {0}pts.", si.TotalScore);
                                       }
-                                      else if (si.position > 0)
+                                      else if (si.Position > 0)
                                       {
                                           message = string.Format("You placed {0} with {1}pts.", GetPosition(si), si.TotalScore); 
                                       }
@@ -35,7 +35,7 @@ public abstract class EndGameMenuBase : ScoreMenuBase
 
     private static string GetPosition(ScoreInfo si)
     {
-        var position = si.position + 1;
+        var position = si.Position + 1;
         switch (position)
         {
             case 2:

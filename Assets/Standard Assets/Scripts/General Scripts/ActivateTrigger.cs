@@ -23,7 +23,7 @@ public class ActivateTrigger : MonoBehaviour {
 		triggerCount--;
 
 		if (triggerCount == 0 || repeatTrigger) {
-			Object currentTarget = target != null ? target : gameObject;
+			Object currentTarget = target ?? gameObject;
 			Behaviour targetBehaviour = currentTarget as Behaviour;
 			GameObject targetGameObject = currentTarget as GameObject;
 			if (targetBehaviour != null)
@@ -40,7 +40,7 @@ public class ActivateTrigger : MonoBehaviour {
 					}
 					break;
 				case Mode.Activate:
-					targetGameObject.active = true;
+					targetGameObject.SetActive(true);
 					break;
 				case Mode.Enable:
 					if (targetBehaviour != null)
@@ -50,7 +50,7 @@ public class ActivateTrigger : MonoBehaviour {
 					targetGameObject.animation.Play ();
 					break;	
 				case Mode.Deactivate:
-					targetGameObject.active = false;
+					targetGameObject.SetActive(false);
 					break;
 			}
 		}

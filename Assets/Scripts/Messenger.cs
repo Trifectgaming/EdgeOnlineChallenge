@@ -17,8 +17,6 @@ public class Messenger
 
     private readonly object _registerLock = new object();
 
-    private bool _isCleanupRegistered;
-
     static Messenger()
     {
     }
@@ -271,20 +269,10 @@ public class Messenger
         }
     }
 
-    //public void RequestCleanup()
-    //{
-    //    if (!_isCleanupRegistered)
-    //    {
-    //        ThreadPool.QueueUserWorkItem(o => Cleanup());
-    //        _isCleanupRegistered = true;
-    //    }
-    //}
-
     public void Cleanup()
     {
         CleanupList(_recipientsOfSubclassesAction);
         CleanupList(_recipientsStrictAction);
-        _isCleanupRegistered = false;
     }
 
     private void SendToTargetOrType<TMessage>(TMessage message, Type messageTargetType, object token)
