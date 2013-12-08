@@ -4,7 +4,7 @@ using System.Collections;
 
 public class Mother : MonoBehaviour
 {
-    //public tk2dSprite[] DamageDecals;
+    public tk2dSprite[] DamageDecals;
     public string spriteNameTemplate;
     public int spriteStart;
     public int spriteEnd;
@@ -32,7 +32,7 @@ public class Mother : MonoBehaviour
                 var rail = GameManager.GetRails()[index];
                 rail.DamageTaken = 0;
 
-                //DamageDecals[index].gameObject.renderer.enabled = false;
+                DamageDecals[index].gameObject.renderer.enabled = true;
             }
         }
     }
@@ -43,9 +43,10 @@ public class Mother : MonoBehaviour
         _motherWidth = GetComponent<tk2dSprite>().GetBounds().center.x *2;
         _transform = transform;
         PlaceMotherAtEdge();
-        //DamageDecals = gameObject.GetComponentsInChildren<tk2dSprite>()
-        //    .OrderBy(t=>t.name)
-        //    .ToArray();
+        DamageDecals = gameObject.GetComponentsInChildren<tk2dSprite>()
+            .Where(t => t.name.Contains("-"))
+            .OrderBy(t => t.name)
+            .ToArray();
         _isStarted = true;
 	}
 	
@@ -72,11 +73,11 @@ public class Mother : MonoBehaviour
             var rail = GameManager.GetRails()[projectile.CurrentRail];
             var previousDamage = rail.DamageTaken;
             rail.DamageTaken += projectile.Damage;
-            if (previousDamage == 0)
+            if (previousDamage >= 1)
             {
-                //var decal = DamageDecals[projectile.CurrentRail];
+                var decal = DamageDecals[projectile.CurrentRail];
                 //decal.spriteId = decal.GetSpriteIdByName(string.Format(spriteNameTemplate, Random.Range(spriteStart, spriteEnd + 1)));
-                //decal.gameObject.renderer.enabled = true;
+                decal.gameObject.renderer.enabled = false;
             }
             if (rail.DamageTaken >= rail.AllowedDamage)
             {
