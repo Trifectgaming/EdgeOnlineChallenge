@@ -75,11 +75,11 @@ public class MouseController : ControllerBase
 	    {
             if (myTransform.position.y > maxY)
             {
-                myTransform.position = new Vector3(myTransform.position.x, maxY);
+                myTransform.position = new Vector3(myTransform.position.x, maxY, myTransform.position.z);
             }
             if (myTransform.position.y < minY)
             {
-                myTransform.position = new Vector3(myTransform.position.x, minY);
+                myTransform.position = new Vector3(myTransform.position.x, minY, myTransform.position.z);
             }
             myTransform.Translate(Vector3.up * moveDownY);
 	    }
@@ -91,11 +91,11 @@ public class MouseController : ControllerBase
 	    {
             if (myTransform.position.x > maxX)
             {
-                myTransform.position = new Vector3(maxX,myTransform.position.y);
+                myTransform.position = new Vector3(maxX, myTransform.position.y, myTransform.position.z);
             }
             if (myTransform.position.x < minX)
             {
-                myTransform.position = new Vector3(minX, myTransform.position.y);
+                myTransform.position = new Vector3(minX, myTransform.position.y, myTransform.position.z);
             }
             myTransform.Translate(Vector3.right * moveDownX);
 	    }

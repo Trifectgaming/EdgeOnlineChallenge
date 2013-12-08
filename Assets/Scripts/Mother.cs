@@ -4,8 +4,7 @@ using System.Collections;
 
 public class Mother : MonoBehaviour
 {
-    public tk2dSprite[] DamageDecals;
-    public tk2dAnimatedSprite[] DamageAnims;
+    //public tk2dSprite[] DamageDecals;
     public string spriteNameTemplate;
     public int spriteStart;
     public int spriteEnd;
@@ -33,10 +32,7 @@ public class Mother : MonoBehaviour
                 var rail = GameManager.GetRails()[index];
                 rail.DamageTaken = 0;
 
-                DamageDecals[index].gameObject.renderer.enabled = false;
-
-                DamageAnims[index].Stop();
-                DamageAnims[index].gameObject.renderer.enabled = false;
+                //DamageDecals[index].gameObject.renderer.enabled = false;
             }
         }
     }
@@ -44,15 +40,12 @@ public class Mother : MonoBehaviour
     void Start ()
     {
         if (_isStarted) return;
-        _motherWidth = GetComponent<tk2dSprite>().GetBounds().size.x * .5f;
+        _motherWidth = GetComponent<tk2dSprite>().GetBounds().center.x *2;
         _transform = transform;
         PlaceMotherAtEdge();
-        DamageDecals = gameObject.GetComponentsInChildren<tk2dSprite>()
-            .OrderBy(t=>t.name)
-            .ToArray();
-        DamageAnims = gameObject.GetComponentsInChildren<tk2dAnimatedSprite>()
-            .OrderBy(t => t.name)
-            .ToArray();
+        //DamageDecals = gameObject.GetComponentsInChildren<tk2dSprite>()
+        //    .OrderBy(t=>t.name)
+        //    .ToArray();
         _isStarted = true;
 	}
 	
@@ -65,7 +58,7 @@ public class Mother : MonoBehaviour
     {
         if (UIHelper.MinX != (_transform.position.x + _motherWidth))
         {
-            _transform.position = new Vector3(UIHelper.MinX + _motherWidth, _transform.position.y);
+            _transform.position = new Vector3(UIHelper.MinX - _motherWidth, _transform.position.y);
         }
     }
 
@@ -81,14 +74,9 @@ public class Mother : MonoBehaviour
             rail.DamageTaken += projectile.Damage;
             if (previousDamage == 0)
             {
-                var decal = DamageDecals[projectile.CurrentRail];
-                decal.spriteId = decal.GetSpriteIdByName(string.Format(spriteNameTemplate, Random.Range(spriteStart, spriteEnd + 1)));
-                decal.gameObject.renderer.enabled = true;
-            }
-            if (rail.DamageTaken >= 2)
-            {
-                DamageAnims[projectile.CurrentRail].Play();
-                DamageAnims[projectile.CurrentRail].gameObject.renderer.enabled = true;
+                //var decal = DamageDecals[projectile.CurrentRail];
+                //decal.spriteId = decal.GetSpriteIdByName(string.Format(spriteNameTemplate, Random.Range(spriteStart, spriteEnd + 1)));
+                //decal.gameObject.renderer.enabled = true;
             }
             if (rail.DamageTaken >= rail.AllowedDamage)
             {

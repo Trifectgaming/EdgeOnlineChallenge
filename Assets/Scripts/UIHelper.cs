@@ -11,7 +11,7 @@ public static class UIHelper
     {
         MaxY = Camera.main.orthographicSize;
         MinY = -MaxY;
-        MaxX = (Camera.main.GetScreenWidth()/Camera.main.GetScreenHeight()*MaxY);
+        MaxX = ((float)Screen.width/Screen.height*MaxY);
         MinX = -MaxX;
     }
 }
