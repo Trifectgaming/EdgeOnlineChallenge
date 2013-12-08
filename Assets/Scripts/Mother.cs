@@ -1,4 +1,5 @@
 using System.Linq;
+using Holoville.HOTween;
 using UnityEngine;
 using System.Collections;
 
@@ -31,10 +32,16 @@ public class Mother : MonoBehaviour
             {
                 var rail = GameManager.GetRails()[index];
                 rail.DamageTaken = 0;
-
-                DamageDecals[index].gameObject.renderer.enabled = true;
+                var decal = DamageDecals[index];
+                RemoveTween(decal);
+                decal.gameObject.renderer.enabled = true;
             }
         }
+    }
+
+    private static void RemoveTween(tk2dSprite decal)
+    {
+        HOTween.GetTweenersByTarget(decal, true).ForEach(t=>t.Rewind());
     }
 
     void Start ()
@@ -47,6 +54,21 @@ public class Mother : MonoBehaviour
             .Where(t => t.name.Contains("-"))
             .OrderBy(t => t.name)
             .ToArray();
+        foreach (var decal in DamageDecals)
+        {
+            var tween = HOTween.To(decal, .5f, "color", Color.red);
+            if (tween == null)
+            {
+                Debug.LogError("Crap screwed up the tween!");
+            }
+            else
+            {
+                tween.loops = -1;
+                tween.loopType = LoopType.Yoyo;
+                tween.easeType = EaseType.Linear;
+                tween.Pause();
+            }
+        }
         _isStarted = true;
 	}
 	
@@ -71,12 +93,15 @@ public class Mother : MonoBehaviour
             projectile.Reset();
             
             var rail = GameManager.GetRails()[projectile.CurrentRail];
-            var previousDamage = rail.DamageTaken;
             rail.DamageTaken += projectile.Damage;
-            if (previousDamage >= 1)
+            var decal = DamageDecals[projectile.CurrentRail];
+            if (rail.DamageTaken == 1)
             {
-                var decal = DamageDecals[projectile.CurrentRail];
-                //decal.spriteId = decal.GetSpriteIdByName(string.Format(spriteNameTemplate, Random.Range(spriteStart, spriteEnd + 1)));
+                HOTween.GetTweenersByTarget(decal, true).ForEach(t => t.Play());                
+            }
+            if (rail.DamageTaken == 2)
+            {
+                RemoveTween(decal);
                 decal.gameObject.renderer.enabled = false;
             }
             if (rail.DamageTaken >= rail.AllowedDamage)
