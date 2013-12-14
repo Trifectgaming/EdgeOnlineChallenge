@@ -57,6 +57,11 @@ public class GameManager : MonoBehaviour
         Messenger.Default.Register<ProjectileFirstFiredMessage>(this, OnFirstFired);
     }
 
+    void OnDestroy()
+    {
+        Messenger.Default.Unregister(this);
+    }
+
     private void OnFirstFired(ProjectileFirstFiredMessage obj)
     {
         if (obj.Color == ProjectileColor.Red && (IgnoreTutorialPref || !PlayerPrefs.HasKey("TutorialOne")))

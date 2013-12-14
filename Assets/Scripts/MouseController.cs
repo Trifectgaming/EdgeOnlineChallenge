@@ -30,6 +30,7 @@ public class ControllerBase : GameSceneObject
         Messenger.Default.Register<GameWonMessage>(this, OnGameWon);
     }
 
+
     private void OnGameWon(GameWonMessage obj)
     {
         enabled = false;
@@ -65,7 +66,7 @@ public class MouseController : ControllerBase
 {
     public MouseSensitivity Sensitivity;
 
-    void Update ()
+    void FixedUpdate ()
     {
         if (Input.touchCount > 0) return;
         float moveDownY = 0.0f;

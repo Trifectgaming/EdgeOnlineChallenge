@@ -65,11 +65,6 @@ public class EnemyManager : GameSceneObject
             }
         }
     }
-    
-    private void Update()
-    {
-        PlaceManagerAtEdge();
-    }
 
     protected override void Awake()
     {

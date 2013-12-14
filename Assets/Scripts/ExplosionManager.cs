@@ -20,6 +20,11 @@ public class ExplosionManager : MonoBehaviour
         Messenger.Default.Register<MotherImpactMessage>(this, OnMotherImpact);
     }
 
+    void OnDestroy()
+    {
+        Messenger.Default.Unregister(this);
+    }
+
     private void OnMotherImpact(MotherImpactMessage obj)
     {
             var explosion = _motherExplosionQueues.Next();

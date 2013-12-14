@@ -18,6 +18,11 @@ public class Mother : MonoBehaviour
         Messenger.Default.Register<LevelStartMessage>(this, OnLevelStart);
     }
 
+    void OnDestroy()
+    {
+        Messenger.Default.Unregister(this);
+    }
+
     private void OnLevelStart(LevelStartMessage obj)
     {
         if (!_isStarted) return;

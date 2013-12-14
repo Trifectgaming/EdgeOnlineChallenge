@@ -20,6 +20,10 @@ public class GameSceneObject : MonoBehaviour
 
     protected virtual void Start()
     {
-        //enabled = false;
+    }
+
+    protected void OnDestroy()
+    {
+        Messenger.Default.Unregister(this);
     }
 }

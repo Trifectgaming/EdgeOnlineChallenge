@@ -24,6 +24,11 @@ public class DamageEffectManager : GameSceneObject
         Messenger.Default.Register<ShieldImpactMessage>(this, OnShieldImpact);
     }
 
+    void OnDestroy()
+    {
+        Messenger.Default.Unregister(this);
+    }
+
     protected override void Start()
     {
         try
