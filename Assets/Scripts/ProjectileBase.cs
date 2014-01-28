@@ -35,8 +35,8 @@ public class ProjectileBase : MonoBehaviour
         var r = rigidbody;
         r.velocity = Vector3.zero;
         r.angularVelocity = Vector3.zero;
-        r.inertiaTensorRotation = Quaternion.identity;
-        r.rotation = Quaternion.identity;
+        //r.inertiaTensorRotation = Quaternion.identity;
+        //r.rotation = Quaternion.identity;
         r.inertiaTensor = new Vector3(1,1,1);
         r.isKinematic = true;
         r.isKinematic = false;
