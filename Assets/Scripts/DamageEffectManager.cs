@@ -8,14 +8,8 @@ public class DamageEffectManager : GameSceneObject
     public float EffectExpirationTime;
     public MouseController MouseController;
     public TapController TapController;
+    public tk2dAnimatedSprite damageAnimation;
     public bool Initialized;
-    public MeshRenderer effectMaterial;
-    public Color effectRed;
-    public Color effectBlue;
-    public Color effectGreen;
-
-    private Color _originalColor;
-    private Color _effectColor;
     private bool _started;
 
     protected override void Awake()
@@ -39,7 +33,7 @@ public class DamageEffectManager : GameSceneObject
             MouseController = parent.GetComponent<MouseController>();
             TapController = parent.GetComponent<TapController>();
             CurrentEffect = DamageEffect.None;
-            _originalColor = effectMaterial.material.GetColor("_TintColor");
+            damageAnimation.Stop();
             _started = true;
         }
         catch (Exception e)
@@ -54,18 +48,7 @@ public class DamageEffectManager : GameSceneObject
         {
             CurrentEffect = obj.Projectile.DamageEffect;
             EffectExpirationTime = Time.time + obj.Projectile.EffectTime;
-            switch (obj.Projectile.ProjectileColor)
-            {
-                case ProjectileColor.Blue:
-                    _effectColor = effectBlue;
-                    break;
-                case ProjectileColor.Green:
-                    _effectColor = effectGreen;
-                    break;
-                case ProjectileColor.Red:
-                    _effectColor = effectRed;
-                    break;
-            }
+            damageAnimation.Play();
         }
     }
 
@@ -85,7 +68,6 @@ public class DamageEffectManager : GameSceneObject
         {
             CurrentEffect = DamageEffect.None;
             MouseController.enabled = true;
-            effectMaterial.material.SetColor("_TintColor", _originalColor);
         }
         if (TapController)
         {
@@ -109,7 +91,6 @@ public class DamageEffectManager : GameSceneObject
                 {
                     TapController.enabled = false;
                 }
-                effectMaterial.material.SetColor("_TintColor", _effectColor);
                 break;
             case DamageEffect.Repulse:
                 break;
