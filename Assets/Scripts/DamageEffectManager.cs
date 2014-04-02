@@ -16,6 +16,10 @@ public class DamageEffectManager : GameSceneObject
     {
         base.Awake();
         Messenger.Default.Register<ShieldImpactMessage>(this, OnShieldImpact);
+        damageAnimation.animationCompleteDelegate += (sprite, id) =>
+                                                         {
+                                                             damageAnimation.renderer.enabled = false;
+                                                         };
     }
 
     void OnDestroy()
@@ -33,6 +37,7 @@ public class DamageEffectManager : GameSceneObject
             MouseController = parent.GetComponent<MouseController>();
             TapController = parent.GetComponent<TapController>();
             CurrentEffect = DamageEffect.None;
+            damageAnimation.renderer.enabled = false;
             damageAnimation.Stop();
             _started = true;
         }
@@ -48,6 +53,7 @@ public class DamageEffectManager : GameSceneObject
         {
             CurrentEffect = obj.Projectile.DamageEffect;
             EffectExpirationTime = Time.time + obj.Projectile.EffectTime;
+            damageAnimation.renderer.enabled = true;            
             damageAnimation.Play();
         }
     }
